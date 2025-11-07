@@ -1,0 +1,29 @@
+{
+  "name": "medweg",
+  "version": "1.0.0",
+  "description": "MEDWEG - Medizinischer Großhandel Application",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "stop": "node scripts/stop.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && npm run seed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/medweg"
+  },
+  "keywords": [
+    "medical",
+    "wholesale",
+    "pflegedienst",
+    "healthcare"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  }
+}

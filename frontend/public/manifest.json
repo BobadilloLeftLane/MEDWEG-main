@@ -1,0 +1,16 @@
+{
+  "name": "MEDWEG",
+  "short_name": "MEDWEG",
+  "description": "MEDWEG - Pflegedienst Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

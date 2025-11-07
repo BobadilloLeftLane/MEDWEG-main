@@ -1,0 +1,348 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Link,
+  InputAdornment,
+  IconButton,
+  Alert,
+  ToggleButtonGroup,
+  ToggleButton,
+} from '@mui/material';
+import { Visibility, VisibilityOff, Login as LoginIcon, Person, Work } from '@mui/icons-material';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { toast } from 'react-toastify';
+import { useAuthStore, UserRole } from '../../store/authStore';
+import { login, workerLogin } from '../../api/authApi';
+
+/**
+ * Login Form Validation Schemas
+ */
+const adminLoginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'E-Mail ist erforderlich')
+    .email('Ungültige E-Mail-Adresse'),
+  password: z
+    .string()
+    .min(6, 'Passwort muss mindestens 6 Zeichen lang sein'),
+});
+
+const workerLoginSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Benutzername ist erforderlich'),
+  password: z
+    .string()
+    .min(6, 'Passwort muss mindestens 6 Zeichen lang sein'),
+});
+
+type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
+type WorkerLoginFormData = z.infer<typeof workerLoginSchema>;
+
+/**
+ * Login Page Component
+ * Clean, modern design with white background, blue accents, and green details
+ */
+const LoginPage = () => {
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const [loginType, setLoginType] = useState<'admin' | 'worker'>('admin');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Automatic localStorage cleanup on mount to clear old/invalid tokens
+  useEffect(() => {
+    try {
+      // Clear auth state to remove any stale tokens
+      clearAuth();
+      console.log('LoginPage: Cleared old auth tokens');
+    } catch (error) {
+      console.error('Error clearing auth:', error);
+    }
+  }, [clearAuth]);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AdminLoginFormData | WorkerLoginFormData>({
+    resolver: zodResolver(loginType === 'admin' ? adminLoginSchema : workerLoginSchema),
+  });
+
+  // Reset form when switching login type
+  useEffect(() => {
+    reset();
+    setErrorMessage('');
+  }, [loginType, reset]);
+
+  const onSubmit = async (data: AdminLoginFormData | WorkerLoginFormData) => {
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      let response;
+
+      if (loginType === 'admin') {
+        const adminData = data as AdminLoginFormData;
+        console.log('Admin login attempt:', adminData.email);
+        response = await login({
+          email: adminData.email,
+          password: adminData.password,
+        });
+      } else {
+        const workerData = data as WorkerLoginFormData;
+        console.log('Worker login attempt:', workerData.username);
+        response = await workerLogin({
+          username: workerData.username,
+          password: workerData.password,
+        });
+      }
+
+      console.log('Login successful:', response.user);
+
+      // Set auth state with real tokens
+      setAuth(
+        response.user,
+        response.accessToken,
+        response.refreshToken
+      );
+
+      toast.success('Erfolgreich angemeldet!');
+
+      // Navigate based on role
+      if (response.user.role === UserRole.ADMIN_APPLICATION) {
+        navigate('/admin/dashboard');
+      } else if (response.user.role === UserRole.ADMIN_INSTITUTION) {
+        navigate('/institution/dashboard');
+      } else if (response.user.role === UserRole.WORKER) {
+        navigate('/worker/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const message = error?.response?.data?.error || error?.message || 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+      setErrorMessage(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #F8FAFC 0%, #E0F2FE 100%)',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 3,
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {/* Logo & Title */}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #2563EB 0%, #10B981 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                boxShadow: '0 4px 20px rgba(37, 99, 235, 0.3)',
+              }}
+            >
+              <LoginIcon sx={{ fontSize: 40, color: 'white' }} />
+            </Box>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #2563EB 0%, #10B981 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              MEDWEG
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Willkommen zurück! Bitte melden Sie sich an.
+            </Typography>
+          </Box>
+
+          {/* Login Type Toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <ToggleButtonGroup
+              value={loginType}
+              exclusive
+              onChange={(_, newType) => newType && setLoginType(newType)}
+              aria-label="Login-Typ"
+              sx={{
+                '& .MuiToggleButton-root': {
+                  px: 3,
+                  py: 1,
+                  fontWeight: 600,
+                },
+              }}
+            >
+              <ToggleButton value="admin" aria-label="Admin Login">
+                <Person sx={{ mr: 1 }} />
+                Admin
+              </ToggleButton>
+              <ToggleButton value="worker" aria-label="Worker Login">
+                <Work sx={{ mr: 1 }} />
+                Worker
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Error Alert */}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMessage}
+            </Alert>
+          )}
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            {loginType === 'admin' ? (
+              <TextField
+                {...register('email')}
+                label="E-Mail"
+                type="email"
+                fullWidth
+                margin="normal"
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                autoComplete="email"
+                autoFocus
+                sx={{ mb: 2 }}
+              />
+            ) : (
+              <TextField
+                {...register('username')}
+                label="Benutzername"
+                type="text"
+                fullWidth
+                margin="normal"
+                error={!!errors.username}
+                helperText={errors.username?.message}
+                autoComplete="username"
+                autoFocus
+                sx={{ mb: 2 }}
+              />
+            )}
+
+            <TextField
+              {...register('password')}
+              label="Passwort"
+              type={showPassword ? 'text' : 'password'}
+              fullWidth
+              margin="normal"
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              autoComplete="current-password"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      aria-label="toggle password visibility"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              size="large"
+              disabled={isLoading}
+              sx={{
+                py: 1.5,
+                background: 'linear-gradient(135deg, #2563EB 0%, #10B981 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1E40AF 0%, #059669 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(37, 99, 235, 0.4)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {isLoading ? 'Anmeldung läuft...' : 'Anmelden'}
+            </Button>
+          </form>
+
+          {/* Register Link */}
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Noch kein Konto?{' '}
+              <Link
+                component={RouterLink}
+                to="/register"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                Jetzt registrieren
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Footer */}
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            textAlign: 'center',
+            mt: 3,
+            color: 'text.secondary',
+          }}
+        >
+          © 2024 MEDWEG - Medizinischer Großhandel
+        </Typography>
+      </Container>
+    </Box>
+  );
+};
+
+export default LoginPage;
