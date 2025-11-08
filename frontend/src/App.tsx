@@ -8,45 +8,108 @@ import ProductsPage from './pages/products/ProductsPage';
 import OrdersPage from './pages/orders/OrdersPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import InstitutionDashboard from './pages/institution/InstitutionDashboard';
+import RecurringOrdersPage from './pages/institution/RecurringOrdersPage';
 import CustomersPage from './pages/admin/CustomersPage';
+import CalculatorPage from './pages/admin/CalculatorPage';
+import WarehousePage from './pages/admin/WarehousePage';
+import TransportPage from './pages/admin/TransportPage';
+import DocumentationPage from './pages/admin/DocumentationPage';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
+import { UserRole } from './store/authStore';
 
 function App() {
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      {/* ==================== PUBLIC ROUTES ==================== */}
+      {/* Login page - redirects to dashboard if already authenticated */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
 
-      {/* Admin Application Dashboard */}
-      <Route path="/admin" element={<DashboardLayout />}>
+      {/* Register page - redirects to dashboard if already authenticated */}
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* ==================== ADMIN APPLICATION ROUTES ==================== */}
+      {/* Only accessible by ADMIN_APPLICATION role */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={[UserRole.ADMIN_APPLICATION]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="calculator" element={<CalculatorPage />} />
+        <Route path="warehouse" element={<WarehousePage />} />
+        <Route path="transport" element={<TransportPage />} />
+        <Route path="documentation" element={<DocumentationPage />} />
       </Route>
 
-      {/* Institution Dashboard */}
-      <Route path="/institution" element={<DashboardLayout />}>
+      {/* ==================== ADMIN INSTITUTION ROUTES ==================== */}
+      {/* Only accessible by ADMIN_INSTITUTION role */}
+      <Route
+        path="/institution"
+        element={
+          <ProtectedRoute allowedRoles={[UserRole.ADMIN_INSTITUTION]}>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/institution/dashboard" replace />} />
         <Route path="dashboard" element={<InstitutionDashboard />} />
         <Route path="patients" element={<PatientsPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="recurring-orders" element={<RecurringOrdersPage />} />
       </Route>
 
-      {/* Worker Dashboard - Simple view without layout */}
-      <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+      {/* ==================== WORKER ROUTES ==================== */}
+      {/* Only accessible by WORKER role */}
+      <Route
+        path="/worker/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={[UserRole.WORKER]}>
+            <WorkerDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Legacy Protected routes - kept for backward compatibility */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
+      {/* ==================== LEGACY ROUTES (Backward Compatibility) ==================== */}
+      {/* Protected - any authenticated user can access */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardHome />} />
         <Route path="patients" element={<PatientsPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="orders" element={<OrdersPage />} />
       </Route>
 
+      {/* ==================== FALLBACK ROUTES ==================== */}
       {/* Redirect root to login */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 

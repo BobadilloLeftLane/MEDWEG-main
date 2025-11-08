@@ -124,6 +124,11 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
 
   const handleSubmit = async () => {
     // Validation
+    if (!selectedPatient) {
+      toast.error('Bitte wählen Sie einen Patienten aus');
+      return;
+    }
+
     if (orderItems.some((item) => !item.product)) {
       toast.error('Bitte wählen Sie für alle Positionen ein Produkt aus');
       return;
@@ -143,7 +148,7 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
       setLoading(true);
 
       const orderData: orderApi.CreateOrderDto = {
-        patient_id: selectedPatient?.id,
+        patient_id: selectedPatient.id,
         items: orderItems.map((item) => ({
           product_id: item.product!.id,
           quantity: item.quantity,
@@ -185,7 +190,7 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
           {/* Patient Selection */}
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Patient {fixedPatientId ? '' : '(optional)'}
+              Patient auswählen *
             </Typography>
             {fixedPatientId ? (
               // Read-only patient display for workers
@@ -209,9 +214,25 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
                   `${option.firstName} ${option.lastName} - ${option.uniqueCode}`
                 }
                 renderInput={(params) => (
-                  <TextField {...params} placeholder="Patient auswählen..." />
+                  <TextField
+                    {...params}
+                    placeholder="Patient auswählen..."
+                    error={!selectedPatient}
+                    helperText={!selectedPatient ? 'Bitte wählen Sie einen Patienten aus' : ''}
+                  />
                 )}
               />
+            )}
+            {/* Display patient address */}
+            {selectedPatient && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  Lieferadresse:
+                </Typography>
+                <Typography variant="body2">
+                  {selectedPatient.address}
+                </Typography>
+              </Alert>
             )}
           </Box>
 

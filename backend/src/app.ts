@@ -130,7 +130,11 @@ import productRoutes from './routes/product.routes';
 import orderRoutes from './routes/order.routes';
 import invoiceRoutes from './routes/invoice.routes';
 import institutionRoutes from './routes/institution.routes';
+import adminRoutes from './routes/admin.routes';
+import warehouseRoutes from './routes/warehouse.routes';
+import recurringOrderRoutes from './routes/recurringOrder.routes';
 import { errorHandler } from './middleware/errorHandler';
+import { startScheduledJobs } from './services/scheduledOrderService';
 
 // Use routes
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
@@ -140,6 +144,9 @@ app.use(`/api/${API_VERSION}/products`, productRoutes);
 app.use(`/api/${API_VERSION}/orders`, orderRoutes);
 app.use(`/api/${API_VERSION}/invoices`, invoiceRoutes);
 app.use(`/api/${API_VERSION}/institutions`, institutionRoutes);
+app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+app.use(`/api/${API_VERSION}/warehouse`, warehouseRoutes);
+app.use(`/api/${API_VERSION}/recurring-orders`, recurringOrderRoutes);
 
 /**
  * 404 Handler
@@ -169,6 +176,9 @@ const startServer = async () => {
       logger.error('Failed to connect to database. Exiting...');
       process.exit(1);
     }
+
+    // Start scheduled jobs for automatic order creation
+    startScheduledJobs();
 
     // Start Express server
     app.listen(PORT, () => {

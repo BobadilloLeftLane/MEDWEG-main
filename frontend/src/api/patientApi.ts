@@ -10,10 +10,7 @@ export interface Patient {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender?: 'M' | 'F' | 'D';
-  address?: string;
-  phone?: string;
-  email?: string;
+  address: string;
   isActive: boolean;
   createdAt: string;
 }

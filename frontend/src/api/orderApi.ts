@@ -21,6 +21,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  order_number: number;
   institution_id: string;
   patient_id: string | null;
   created_by_user_id: string | null;
@@ -33,6 +34,8 @@ export interface Order {
   approved_at: string | null;
   shipped_at: string | null;
   total_amount: number;
+  selected_shipping_carrier: string | null;
+  selected_shipping_price: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -50,7 +53,7 @@ export interface OrderWithDetails extends OrderWithItems {
 }
 
 export interface CreateOrderDto {
-  patient_id?: string;
+  patient_id: string;
   items: Array<{
     product_id: string;
     quantity: number;
@@ -65,7 +68,9 @@ export interface CreateOrderDto {
 export const getAllOrders = async (filters?: {
   status?: OrderStatus;
   institution_id?: string;
-}): Promise<OrderWithDetails[]> => {
+  page?: number;
+  limit?: number;
+}): Promise<{ orders: OrderWithDetails[]; total: number; totalPages: number; page: number; limit: number }> => {
   const params = new URLSearchParams();
 
   if (filters?.status) {
@@ -74,9 +79,21 @@ export const getAllOrders = async (filters?: {
   if (filters?.institution_id) {
     params.append('institution_id', filters.institution_id);
   }
+  if (filters?.page) {
+    params.append('page', filters.page.toString());
+  }
+  if (filters?.limit) {
+    params.append('limit', filters.limit.toString());
+  }
 
   const response = await apiClient.get(`/orders/all?${params.toString()}`);
-  return response.data.data;
+  return {
+    orders: response.data.data,
+    total: response.data.meta.total,
+    totalPages: response.data.meta.totalPages,
+    page: response.data.meta.page,
+    limit: response.data.meta.limit,
+  };
 };
 
 /**
@@ -85,7 +102,7 @@ export const getAllOrders = async (filters?: {
 export const getOrders = async (filters?: {
   status?: OrderStatus;
   patient_id?: string;
-}): Promise<OrderWithItems[]> => {
+}): Promise<OrderWithDetails[]> => {
   const params = new URLSearchParams();
 
   if (filters?.status) {
@@ -150,4 +167,61 @@ export const confirmOrder = async (id: string): Promise<Order> => {
  */
 export const deleteOrder = async (id: string): Promise<void> => {
   await apiClient.delete(`/orders/${id}`);
+};
+
+/**
+ * Update selected shipping option (for admin_application only)
+ */
+export const updateSelectedShipping = async (
+  id: string,
+  carrier: string,
+  price: number
+): Promise<Order> => {
+  const response = await apiClient.patch(`/orders/${id}/shipping`, {
+    carrier,
+    price
+  });
+  return response.data.data;
+};
+
+/**
+ * Download invoice PDF (for admin_application only)
+ */
+export const downloadInvoicePDF = async (id: string, orderNumber: number): Promise<void> => {
+  const response = await apiClient.get(`/orders/${id}/invoice`, {
+    responseType: 'blob',
+  });
+
+  // Create download link
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Rechnung_${orderNumber}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
+
+/**
+ * Download monthly report PDF (for admin_application only)
+ */
+export const downloadMonthlyReport = async (month: number, year: number): Promise<void> => {
+  const response = await apiClient.get(`/orders/monthly-report/${year}/${month}`, {
+    responseType: 'blob',
+  });
+
+  // Create download link
+  const monthNames = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                      'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Monatsbericht_${monthNames[month]}_${year}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 };

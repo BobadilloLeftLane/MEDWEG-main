@@ -54,10 +54,7 @@ const patientSchema = z.object({
   firstName: z.string().min(2, 'Vorname ist erforderlich'),
   lastName: z.string().min(2, 'Nachname ist erforderlich'),
   dateOfBirth: z.string().min(1, 'Geburtsdatum ist erforderlich'),
-  gender: z.enum(['M', 'F', 'D']),
   address: z.string().min(5, 'Adresse ist erforderlich'),
-  phone: z.string().optional(),
-  email: z.string().email('Ungültige E-Mail').optional().or(z.literal('')),
 });
 
 type PatientFormData = z.infer<typeof patientSchema>;
@@ -138,10 +135,7 @@ const PatientsPage = () => {
         firstName: patient.firstName,
         lastName: patient.lastName,
         dateOfBirth: patient.dateOfBirth,
-        gender: patient.gender,
         address: patient.address || '',
-        phone: patient.phone || '',
-        email: patient.email || '',
       });
     } else {
       setSelectedPatient(null);
@@ -149,10 +143,7 @@ const PatientsPage = () => {
         firstName: '',
         lastName: '',
         dateOfBirth: '',
-        gender: 'M',
         address: '',
-        phone: '',
-        email: '',
       });
     }
     setOpenDialog(true);
@@ -306,20 +297,6 @@ const PatientsPage = () => {
       .includes(searchQuery.toLowerCase())
   );
 
-  const getGenderLabel = (gender?: string) => {
-    if (!gender) return '-';
-    switch (gender) {
-      case 'M':
-        return 'Männlich';
-      case 'F':
-        return 'Weiblich';
-      case 'D':
-        return 'Divers';
-      default:
-        return gender;
-    }
-  };
-
   return (
     <Box>
       {/* Header */}
@@ -406,9 +383,7 @@ const PatientsPage = () => {
                 <TableCell sx={{ fontWeight: 600 }}>Patient ID</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Geburtsdatum</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Geschlecht</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Adresse</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Kontakt</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Worker</TableCell>
                 <TableCell sx={{ fontWeight: 600 }} align="right">
                   Aktionen
@@ -444,15 +419,8 @@ const PatientsPage = () => {
                       </Box>
                     </TableCell>
                     <TableCell>{new Date(patient.dateOfBirth).toLocaleDateString('de-DE')}</TableCell>
-                    <TableCell>{getGenderLabel(patient.gender)}</TableCell>
                     <TableCell>
                       <Typography variant="body2">{patient.address || '-'}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{patient.phone || '-'}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {patient.email || '-'}
-                      </Typography>
                     </TableCell>
                     <TableCell>
                       {loadingWorkers ? (
@@ -708,49 +676,13 @@ const PatientsPage = () => {
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('gender')}
-                  label="Geschlecht"
-                  select
-                  fullWidth
-                  error={!!errors.gender}
-                  helperText={errors.gender?.message}
-                  margin="dense"
-                  SelectProps={{ native: true }}
-                >
-                  <option value="M">Männlich</option>
-                  <option value="F">Weiblich</option>
-                  <option value="D">Divers</option>
-                </TextField>
-              </Grid>
               <Grid item xs={12}>
                 <TextField
                   {...register('address')}
-                  label="Adresse"
+                  label="Adresse Nr. PLZ Ort"
                   fullWidth
                   error={!!errors.address}
                   helperText={errors.address?.message}
-                  margin="dense"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('phone')}
-                  label="Telefon"
-                  fullWidth
-                  error={!!errors.phone}
-                  helperText={errors.phone?.message}
-                  margin="dense"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  {...register('email')}
-                  label="E-Mail"
-                  fullWidth
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
                   margin="dense"
                 />
               </Grid>

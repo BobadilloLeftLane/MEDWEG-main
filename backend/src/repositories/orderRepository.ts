@@ -16,6 +16,7 @@ export enum OrderStatus {
 
 export interface Order {
   id: string;
+  order_number: number;
   institution_id: string;
   patient_id: string | null;
   created_by_user_id: string | null;
@@ -28,6 +29,8 @@ export interface Order {
   approved_at: Date | null;
   shipped_at: Date | null;
   total_amount: number;
+  selected_shipping_carrier: string | null;
+  selected_shipping_price: number | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -162,7 +165,38 @@ export const findOrderById = async (orderId: string): Promise<OrderWithItems | n
 export const getAllOrdersWithDetails = async (filters?: {
   status?: OrderStatus;
   institution_id?: string;
-}): Promise<OrderWithDetails[]> => {
+  page?: number;
+  limit?: number;
+}): Promise<{ orders: OrderWithDetails[]; total: number }> => {
+  const page = filters?.page || 1;
+  const limit = filters?.limit || 20;
+  const offset = (page - 1) * limit;
+
+  // First, get total count
+  let countQuery = `
+    SELECT COUNT(*) as total
+    FROM orders o
+    WHERE 1=1
+  `;
+  const countValues: any[] = [];
+  let countParamCount = 1;
+
+  if (filters?.status) {
+    countQuery += ` AND o.status = $${countParamCount}`;
+    countValues.push(filters.status);
+    countParamCount++;
+  }
+
+  if (filters?.institution_id) {
+    countQuery += ` AND o.institution_id = $${countParamCount}`;
+    countValues.push(filters.institution_id);
+    countParamCount++;
+  }
+
+  const countResult = await pool.query(countQuery, countValues);
+  const total = parseInt(countResult.rows[0].total);
+
+  // Then get paginated orders
   let query = `
     SELECT
       o.*,
@@ -190,7 +224,8 @@ export const getAllOrdersWithDetails = async (filters?: {
     paramCount++;
   }
 
-  query += ` ORDER BY o.created_at DESC`;
+  query += ` ORDER BY o.created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+  values.push(limit, offset);
 
   const orderResult = await pool.query(query, values);
 
@@ -230,7 +265,7 @@ export const getAllOrdersWithDetails = async (filters?: {
     })
   );
 
-  return orders;
+  return { orders, total };
 };
 
 /**
@@ -243,7 +278,7 @@ export const getOrdersByInstitution = async (
     patient_id?: string;
     is_automatic?: boolean;
   }
-): Promise<OrderWithItems[]> => {
+): Promise<OrderWithDetails[]> => {
   let query = `SELECT * FROM orders WHERE institution_id = $1`;
   const values: any[] = [institutionId];
   let paramCount = 2;
@@ -270,16 +305,38 @@ export const getOrdersByInstitution = async (
 
   const orderResult = await pool.query(query, values);
 
-  // Get items for all orders
-  const orders: OrderWithItems[] = await Promise.all(
+  // Get items and patient info for all orders
+  const orders: OrderWithDetails[] = await Promise.all(
     orderResult.rows.map(async (order) => {
       const itemsResult = await pool.query(`SELECT * FROM order_items WHERE order_id = $1`, [
         order.id,
       ]);
 
+      let patient_name = null;
+      let patient_address = null;
+      if (order.patient_id) {
+        const patientResult = await pool.query(
+          `SELECT first_name, last_name, address FROM patients WHERE id = $1`,
+          [order.patient_id]
+        );
+        if (patientResult.rows.length > 0) {
+          const p = patientResult.rows[0];
+          // Decrypt patient data
+          const firstName = await decrypt(p.first_name);
+          const lastName = await decrypt(p.last_name);
+          patient_name = `${firstName} ${lastName}`;
+
+          if (p.address) {
+            patient_address = await decrypt(p.address);
+          }
+        }
+      }
+
       return {
         ...order,
         items: itemsResult.rows,
+        patient_name,
+        patient_address,
       };
     })
   );
@@ -371,4 +428,25 @@ export const getOrderStats = async (
  */
 export const deleteOrder = async (orderId: string): Promise<void> => {
   await pool.query(`DELETE FROM orders WHERE id = $1`, [orderId]);
+};
+
+/**
+ * Update selected shipping option
+ */
+export const updateSelectedShipping = async (
+  orderId: string,
+  carrier: string,
+  price: number
+): Promise<Order> => {
+  const result = await pool.query(
+    `UPDATE orders
+     SET selected_shipping_carrier = $1,
+         selected_shipping_price = $2,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $3
+     RETURNING *`,
+    [carrier, price, orderId]
+  );
+
+  return result.rows[0];
 };

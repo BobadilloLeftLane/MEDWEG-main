@@ -13,7 +13,11 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "migrate": "ts-node src/config/migrations/run.ts",
-    "seed": "ts-node src/config/seeds/run.ts"
+    "seed": "ts-node src/config/seeds/run.ts",
+    "script1": "ts-node src/scripts/seedInstitutions.ts",
+    "script2": "ts-node src/scripts/seedPatients.ts",
+    "script3": "ts-node src/scripts/seedOrders.ts",
+    "fix-images": "ts-node src/scripts/fixProductImages.ts"
   },
   "keywords": [
     "medical",

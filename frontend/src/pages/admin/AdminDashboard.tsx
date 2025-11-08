@@ -1,48 +1,154 @@
-import { Box, Typography, Grid, Card, CardContent } from '@mui/material';
-import { Business, People, ShoppingCart, TrendingUp } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Divider,
+} from '@mui/material';
+import {
+  Business,
+  People,
+  ShoppingCart,
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+} from '@mui/icons-material';
+import { toast } from 'react-toastify';
+import * as adminApi from '../../api/adminApi';
 
 /**
  * Admin Application Dashboard
- * Za admin@gmail.com - vidi SVE institucije, sve porudžbine, statistike sistema
+ * Real-time statistics from backend API
  */
 const AdminDashboard = () => {
-  const stats = [
+  const [dashboardStats, setDashboardStats] = useState<adminApi.DashboardStatistics | null>(null);
+  const [institutionStats, setInstitutionStats] = useState<adminApi.InstitutionStatistics[]>([]);
+  const [productStats, setProductStats] = useState<adminApi.ProductStatistics[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Load all statistics
+  useEffect(() => {
+    const loadStatistics = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        // Fetch all statistics in parallel
+        const [dashboard, institutions, products] = await Promise.all([
+          adminApi.getDashboardStatistics(),
+          adminApi.getInstitutionStatistics(),
+          adminApi.getProductStatistics(),
+        ]);
+
+        setDashboardStats(dashboard);
+        setInstitutionStats(institutions);
+        setProductStats(products);
+      } catch (err: any) {
+        const errorMessage = err?.response?.data?.error || 'Fehler beim Laden der Statistiken';
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStatistics();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error || !dashboardStats) {
+    return (
+      <Alert severity="error" sx={{ mb: 3 }}>
+        {error || 'Keine Daten verfügbar'}
+      </Alert>
+    );
+  }
+
+  // Revenue trend icon
+  const RevenueTrendIcon = () => {
+    if (dashboardStats.revenue.percent_change > 0) {
+      return <TrendingUp sx={{ fontSize: 20, color: 'success.main', ml: 0.5 }} />;
+    } else if (dashboardStats.revenue.percent_change < 0) {
+      return <TrendingDown sx={{ fontSize: 20, color: 'error.main', ml: 0.5 }} />;
+    }
+    return <TrendingFlat sx={{ fontSize: 20, color: 'text.secondary', ml: 0.5 }} />;
+  };
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(amount);
+  };
+
+  // Calculate active orders (pending + confirmed)
+  const activeOrders = dashboardStats.orders.pending + dashboardStats.orders.confirmed;
+
+  // Get most and least popular products
+  const mostPopular = productStats.slice(0, 5);
+  const leastPopular = productStats.slice(-5).reverse();
+
+  const mainStats = [
     {
       title: 'Einrichtungen Gesamt',
-      value: 4,
+      value: dashboardStats.institutions.total,
       icon: <Business sx={{ fontSize: 40 }} />,
       color: '#2563EB',
       bgColor: 'rgba(37, 99, 235, 0.1)',
-      change: '+1 diese Woche',
+      change: `+${dashboardStats.institutions.new_this_week} diese Woche`,
     },
     {
       title: 'Benutzer Gesamt',
-      value: 12,
+      value: dashboardStats.users.total,
       icon: <People sx={{ fontSize: 40 }} />,
       color: '#10B981',
       bgColor: 'rgba(16, 185, 129, 0.1)',
-      change: '+3 neue',
+      change: `+${dashboardStats.users.new_this_week} neue`,
     },
     {
       title: 'Bestellungen Gesamt',
-      value: 156,
+      value: dashboardStats.orders.total,
       icon: <ShoppingCart sx={{ fontSize: 40 }} />,
       color: '#F59E0B',
       bgColor: 'rgba(245, 158, 11, 0.1)',
-      change: '45 aktiv',
+      change: `${activeOrders} aktiv`,
     },
     {
       title: 'Gesamtumsatz',
-      value: '€125.450',
+      value: formatCurrency(dashboardStats.revenue.total),
       icon: <TrendingUp sx={{ fontSize: 40 }} />,
       color: '#06B6D4',
       bgColor: 'rgba(6, 182, 212, 0.1)',
-      change: '+22% vs. letzter Monat',
+      change: `${dashboardStats.revenue.percent_change > 0 ? '+' : ''}${dashboardStats.revenue.percent_change}% vs. letzter Monat`,
     },
   ];
 
   return (
     <Box>
+      {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h4"
@@ -62,8 +168,9 @@ const AdminDashboard = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {stats.map((stat, index) => (
+      {/* Main Statistics Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {mainStats.map((stat, index) => (
           <Grid item xs={12} sm={6} lg={3} key={index}>
             <Card
               sx={{
@@ -101,9 +208,12 @@ const AdminDashboard = () => {
                     >
                       {stat.value}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {stat.change}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {stat.change}
+                      </Typography>
+                      {stat.title === 'Gesamtumsatz' && <RevenueTrendIcon />}
+                    </Box>
                   </Box>
                   <Box
                     sx={{
@@ -124,6 +234,169 @@ const AdminDashboard = () => {
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      {/* Institution Statistics Table */}
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          Einrichtungen - Detaillierte Statistik
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Einrichtung</strong></TableCell>
+                <TableCell align="right"><strong>Bestellungen</strong></TableCell>
+                <TableCell align="right"><strong>Umsatz</strong></TableCell>
+                <TableCell align="right"><strong>Patienten</strong></TableCell>
+                <TableCell align="center"><strong>Status</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {institutionStats.map((institution) => (
+                <TableRow key={institution.institution_id} hover>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {institution.institution_name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2">
+                      {institution.total_orders}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {institution.pending_orders} ausstehend
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      {formatCurrency(institution.total_revenue)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2">
+                      {institution.patient_count}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={institution.confirmed_orders > 0 ? 'Aktiv' : 'Inaktiv'}
+                      color={institution.confirmed_orders > 0 ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {institutionStats.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <Typography variant="body2" color="text.secondary">
+                      Keine Einrichtungen vorhanden
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Product Statistics */}
+      <Grid container spacing={3}>
+        {/* Most Popular Products */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'success.main' }}>
+              Beliebteste Produkte
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            {mostPopular.length > 0 ? (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell><strong>Produkt</strong></TableCell>
+                      <TableCell align="right"><strong>Bestellungen</strong></TableCell>
+                      <TableCell align="right"><strong>Menge</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {mostPopular.map((product, index) => (
+                      <TableRow key={product.product_id}>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {index + 1}. {product.product_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {product.type}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="body2">{product.times_ordered}</Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="body2">{product.total_quantity}</Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary" align="center">
+                Keine Daten verfügbar
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Least Popular Products */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'error.main' }}>
+              Am wenigsten bestellte Produkte
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            {leastPopular.length > 0 ? (
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell><strong>Produkt</strong></TableCell>
+                      <TableCell align="right"><strong>Bestellungen</strong></TableCell>
+                      <TableCell align="right"><strong>Menge</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {leastPopular.map((product, index) => (
+                      <TableRow key={product.product_id}>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {index + 1}. {product.product_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {product.type}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="body2">{product.times_ordered}</Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Typography variant="body2">{product.total_quantity}</Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary" align="center">
+                Keine Daten verfügbar
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
       </Grid>
     </Box>
   );

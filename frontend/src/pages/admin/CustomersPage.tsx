@@ -23,6 +23,10 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  Collapse,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import {
   Business as BusinessIcon,
@@ -31,18 +35,24 @@ import {
   CheckCircle as CheckCircleIcon,
   Block as BlockIcon,
   LocationOn as LocationIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import * as institutionApi from '../../api/institutionApi';
+import * as adminApi from '../../api/adminApi';
 
 /**
  * Customers Page Component
- * Display and manage institutions (Kunden/Firmen) - admin_application only
+ * Display and manage institutions with patient information - admin_application only
  */
 const CustomersPage = () => {
   const [institutions, setInstitutions] = useState<institutionApi.Institution[]>([]);
+  const [patientsData, setPatientsData] = useState<adminApi.PatientsByInstitution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   // Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -53,21 +63,25 @@ const CustomersPage = () => {
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
-  // Load institutions
-  const loadInstitutions = async () => {
+  // Load institutions and patients
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await institutionApi.getInstitutions();
-      setInstitutions(data);
+      const [institutionsData, patients] = await Promise.all([
+        institutionApi.getInstitutions(),
+        adminApi.getPatientsByInstitution(),
+      ]);
+      setInstitutions(institutionsData);
+      setPatientsData(patients);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Fehler beim Laden der Kunden');
+      toast.error(error.response?.data?.error || 'Fehler beim Laden der Daten');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadInstitutions();
+    loadData();
   }, []);
 
   // Filter institutions by search
@@ -75,8 +89,29 @@ const CustomersPage = () => {
     inst.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Get patient data for institution
+  const getPatientData = (institutionId: string) => {
+    return patientsData.find((pd) => pd.institution_id === institutionId);
+  };
+
+  // Toggle row expansion
+  const handleToggleExpand = (institutionId: string) => {
+    setExpandedRows((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(institutionId)) {
+        newSet.delete(institutionId);
+      } else {
+        newSet.add(institutionId);
+      }
+      return newSet;
+    });
+  };
+
   // Menu handlers
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, institution: institutionApi.Institution) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    institution: institutionApi.Institution
+  ) => {
     setAnchorEl(event.currentTarget);
     setSelectedInstitution(institution);
   };
@@ -98,7 +133,7 @@ const CustomersPage = () => {
     try {
       await institutionApi.verifyInstitution(selectedInstitution.id);
       toast.success('Kunde erfolgreich verifiziert');
-      loadInstitutions();
+      loadData();
       setVerifyDialogOpen(false);
       setSelectedInstitution(null);
     } catch (error: any) {
@@ -118,7 +153,7 @@ const CustomersPage = () => {
     try {
       await institutionApi.deactivateInstitution(selectedInstitution.id);
       toast.success('Kunde erfolgreich deaktiviert');
-      loadInstitutions();
+      loadData();
       setDeactivateDialogOpen(false);
       setSelectedInstitution(null);
     } catch (error: any) {
@@ -167,8 +202,10 @@ const CustomersPage = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell width={50} />
                 <TableCell><strong>Firmenname</strong></TableCell>
                 <TableCell><strong>Standort</strong></TableCell>
+                <TableCell align="center"><strong>Patienten</strong></TableCell>
                 <TableCell><strong>Registriert am</strong></TableCell>
                 <TableCell><strong>Verifiziert</strong></TableCell>
                 <TableCell><strong>Status</strong></TableCell>
@@ -176,52 +213,126 @@ const CustomersPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredInstitutions.map((institution) => (
-                <TableRow key={institution.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <BusinessIcon color="primary" />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {institution.name}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocationIcon fontSize="small" color="action" />
-                      <Typography variant="body2">
-                        {institution.address_plz} {institution.address_city}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(institution.created_at).toLocaleDateString('de-DE')}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      icon={institution.is_verified ? <CheckCircleIcon /> : undefined}
-                      label={institution.is_verified ? 'Verifiziert' : 'Nicht verifiziert'}
-                      color={institution.is_verified ? 'success' : 'default'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={institution.is_active ? 'Aktiv' : 'Inaktiv'}
-                      color={institution.is_active ? 'success' : 'default'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, institution)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredInstitutions.map((institution) => {
+                const patientData = getPatientData(institution.id);
+                const isExpanded = expandedRows.has(institution.id);
+                const hasPatients = patientData && patientData.patient_count > 0;
+
+                return (
+                  <>
+                    <TableRow key={institution.id} hover>
+                      <TableCell>
+                        {hasPatients && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleExpand(institution.id)}
+                          >
+                            {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                          </IconButton>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <BusinessIcon color="primary" />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {institution.name}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocationIcon fontSize="small" color="action" />
+                          <Typography variant="body2">
+                            {institution.address_plz} {institution.address_city}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          icon={<PersonIcon />}
+                          label={patientData?.patient_count || 0}
+                          color={hasPatients ? 'primary' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {new Date(institution.created_at).toLocaleDateString('de-DE')}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          icon={institution.is_verified ? <CheckCircleIcon /> : undefined}
+                          label={institution.is_verified ? 'Verifiziert' : 'Nicht verifiziert'}
+                          color={institution.is_verified ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={institution.is_active ? 'Aktiv' : 'Inaktiv'}
+                          color={institution.is_active ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, institution)}>
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Expanded Row - Patient List */}
+                    {hasPatients && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={8}
+                          sx={{ py: 0, borderBottom: isExpanded ? undefined : 'none' }}
+                        >
+                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                            <Box sx={{ p: 3, bgcolor: 'grey.50' }}>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ mb: 2, fontWeight: 700, color: 'primary.main' }}
+                              >
+                                Patienten ({patientData!.patient_count})
+                              </Typography>
+                              <List dense>
+                                {patientData!.patients.map((patient, index) => (
+                                  <ListItem
+                                    key={patient.id}
+                                    sx={{
+                                      bgcolor: 'white',
+                                      mb: 1,
+                                      borderRadius: 1,
+                                      border: '1px solid',
+                                      borderColor: 'divider',
+                                    }}
+                                  >
+                                    <ListItemText
+                                      primary={
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {index + 1}. {patient.first_name} {patient.last_name}
+                                        </Typography>
+                                      }
+                                      secondary={
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                          <LocationIcon fontSize="small" sx={{ fontSize: 16 }} />
+                                          <Typography variant="caption" color="text.secondary">
+                                            {patient.address || 'Keine Adresse hinterlegt'}
+                                          </Typography>
+                                        </Box>
+                                      }
+                                    />
+                                  </ListItem>
+                                ))}
+                              </List>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -248,8 +359,8 @@ const CustomersPage = () => {
         <DialogTitle>Kunde verifizieren?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Möchten Sie den Kunden "{selectedInstitution?.name}" verifizieren?
-            Der Kunde kann dann Bestellungen aufgeben.
+            Möchten Sie den Kunden "{selectedInstitution?.name}" verifizieren? Der Kunde kann dann
+            Bestellungen aufgeben.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -265,8 +376,8 @@ const CustomersPage = () => {
         <DialogTitle>Kunde deaktivieren?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Möchten Sie den Kunden "{selectedInstitution?.name}" wirklich deaktivieren?
-            Der Kunde kann dann keine Bestellungen mehr aufgeben.
+            Möchten Sie den Kunden "{selectedInstitution?.name}" wirklich deaktivieren? Der Kunde
+            kann dann keine Bestellungen mehr aufgeben.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

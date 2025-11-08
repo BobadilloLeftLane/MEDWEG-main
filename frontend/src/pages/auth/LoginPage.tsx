@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -53,12 +53,16 @@ type WorkerLoginFormData = z.infer<typeof workerLoginSchema>;
  */
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const [loginType, setLoginType] = useState<'admin' | 'worker'>('admin');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Get the page user was trying to access before being redirected to login
+  const from = (location.state as any)?.from?.pathname || null;
 
   // Automatic localStorage cleanup on mount to clear old/invalid tokens
   useEffect(() => {
@@ -120,16 +124,26 @@ const LoginPage = () => {
 
       toast.success('Erfolgreich angemeldet!');
 
-      // Navigate based on role
-      if (response.user.role === UserRole.ADMIN_APPLICATION) {
-        navigate('/admin/dashboard');
-      } else if (response.user.role === UserRole.ADMIN_INSTITUTION) {
-        navigate('/institution/dashboard');
-      } else if (response.user.role === UserRole.WORKER) {
-        navigate('/worker/dashboard');
+      // Navigate to the page user was trying to access, or to their default dashboard
+      let destination: string;
+
+      if (from) {
+        // User was trying to access a specific page before being redirected to login
+        destination = from;
       } else {
-        navigate('/dashboard');
+        // Default navigation based on role
+        if (response.user.role === UserRole.ADMIN_APPLICATION) {
+          destination = '/admin/dashboard';
+        } else if (response.user.role === UserRole.ADMIN_INSTITUTION) {
+          destination = '/institution/dashboard';
+        } else if (response.user.role === UserRole.WORKER) {
+          destination = '/worker/dashboard';
+        } else {
+          destination = '/dashboard';
+        }
       }
+
+      navigate(destination, { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
       const message = error?.response?.data?.error || error?.message || 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.';

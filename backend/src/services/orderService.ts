@@ -255,3 +255,28 @@ export const deleteOrder = async (orderId: string, institutionId: string): Promi
     message: 'Bestellung erfolgreich gelöscht',
   };
 };
+
+/**
+ * Update selected shipping option (admin_application only)
+ */
+export const updateSelectedShipping = async (
+  orderId: string,
+  carrier: string,
+  price: number
+): Promise<orderRepo.Order> => {
+  const order = await orderRepo.findOrderById(orderId);
+
+  if (!order) {
+    throw new NotFoundError('Bestellung nicht gefunden');
+  }
+
+  const updatedOrder = await orderRepo.updateSelectedShipping(orderId, carrier, price);
+
+  logger.info('Shipping option selected', {
+    orderId,
+    carrier,
+    price,
+  });
+
+  return updatedOrder;
+};

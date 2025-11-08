@@ -38,6 +38,27 @@ router.patch(
   orderController.updateOrderStatusAdmin
 );
 
+// PATCH /api/v1/orders/:id/shipping - Update selected shipping option (admin only)
+router.patch(
+  '/:id/shipping',
+  authorize([UserRole.ADMIN_APPLICATION]),
+  orderController.updateSelectedShipping
+);
+
+// GET /api/v1/orders/:id/invoice - Generate invoice PDF (admin only)
+router.get(
+  '/:id/invoice',
+  authorize([UserRole.ADMIN_APPLICATION]),
+  orderController.generateInvoicePDF
+);
+
+// GET /api/v1/orders/monthly-report/:year/:month - Generate monthly report PDF (admin only)
+router.get(
+  '/monthly-report/:year/:month',
+  authorize([UserRole.ADMIN_APPLICATION]),
+  orderController.generateMonthlyReportPDF
+);
+
 // Institution/Worker routes
 router.use(authorize([UserRole.ADMIN_INSTITUTION, UserRole.WORKER, UserRole.ADMIN_APPLICATION]));
 

@@ -32,7 +32,7 @@ import {
   MoreVert as MoreVertIcon,
   FilterList as FilterIcon,
   ShoppingCart as ShoppingCartIcon,
-  CleaningServices as CleaningServicesIcon,
+  Inventory as InventoryIcon,
   Sanitizer as SanitizerIcon,
   PanTool as PanToolIcon,
 } from '@mui/icons-material';
@@ -164,7 +164,7 @@ const ProductsPage = () => {
         color = '#10B981'; // Green
         break;
       case 'disinfectant_wipes':
-        IconComponent = CleaningServicesIcon;
+        IconComponent = InventoryIcon;
         color = '#F59E0B'; // Orange
         break;
       default:

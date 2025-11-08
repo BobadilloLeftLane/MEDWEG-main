@@ -19,6 +19,7 @@ import {
   useTheme,
   useMediaQuery,
   Badge,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -29,10 +30,17 @@ import {
   Logout,
   AccountCircle,
   Business,
+  Calculate,
+  Warehouse,
+  LocalShipping,
+  Description,
+  Warning as WarningIcon,
+  Loop,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import { useAuthStore, UserRole } from '../../store/authStore';
 import * as orderApi from '../../api/orderApi';
+import * as warehouseApi from '../../api/warehouseApi';
 
 const DRAWER_WIDTH = 260;
 
@@ -56,21 +64,33 @@ const DashboardLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
 
-  // Fetch pending orders count for admin_application
+  // Fetch pending orders count and low stock count for admin_application
   useEffect(() => {
     if (user?.role === UserRole.ADMIN_APPLICATION) {
       const fetchPendingOrders = async () => {
         try {
-          const orders = await orderApi.getAllOrders({ status: 'pending' });
-          const unconfirmedCount = orders.filter(order => !order.is_confirmed).length;
+          // Fetch all pending orders (no pagination) to get accurate count
+          const result = await orderApi.getAllOrders({ status: 'pending', limit: 9999 });
+          const unconfirmedCount = result.orders.filter(order => !order.is_confirmed).length;
           setPendingOrdersCount(unconfirmedCount);
         } catch (error) {
           console.error('Failed to fetch pending orders:', error);
         }
       };
 
+      const fetchLowStockCount = async () => {
+        try {
+          const count = await warehouseApi.getLowStockAlertsCount();
+          setLowStockCount(count);
+        } catch (error) {
+          console.error('Failed to fetch low stock count:', error);
+        }
+      };
+
       fetchPendingOrders();
+      fetchLowStockCount();
 
       // Listen for order confirmation events to update badge immediately
       const handleOrderConfirmed = () => {
@@ -78,8 +98,11 @@ const DashboardLayout = () => {
       };
       window.addEventListener('orderConfirmed', handleOrderConfirmed);
 
-      // Poll every 30 seconds for new orders
-      const interval = setInterval(fetchPendingOrders, 30000);
+      // Poll every 30 seconds for new orders and stock alerts
+      const interval = setInterval(() => {
+        fetchPendingOrders();
+        fetchLowStockCount();
+      }, 30000);
 
       return () => {
         clearInterval(interval);
@@ -114,6 +137,10 @@ const DashboardLayout = () => {
         { text: 'Kunden', icon: <Business />, path: `${basePath}/customers` },
         { text: 'Produkte', icon: <Inventory />, path: `${basePath}/products` },
         { text: 'Bestellungen', icon: <ShoppingCart />, path: `${basePath}/orders` },
+        { text: 'Kalkulator', icon: <Calculate />, path: `${basePath}/calculator` },
+        { text: 'Lager', icon: <Warehouse />, path: `${basePath}/warehouse` },
+        { text: 'Transportdienst', icon: <LocalShipping />, path: `${basePath}/transport` },
+        { text: 'Dokumentation', icon: <Description />, path: `${basePath}/documentation` },
       );
     }
 
@@ -123,6 +150,7 @@ const DashboardLayout = () => {
         { text: 'Patienten', icon: <People />, path: `${basePath}/patients` },
         { text: 'Produkte', icon: <Inventory />, path: `${basePath}/products` },
         { text: 'Bestellungen', icon: <ShoppingCart />, path: `${basePath}/orders` },
+        { text: 'Automatische Bestellungen', icon: <Loop />, path: `${basePath}/recurring-orders` },
       );
     }
 
@@ -202,7 +230,9 @@ const DashboardLayout = () => {
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const isOrdersPage = item.text === 'Bestellungen';
-          const showBadge = isOrdersPage && user?.role === UserRole.ADMIN_APPLICATION && pendingOrdersCount > 0;
+          const isWarehousePage = item.text === 'Lager';
+          const showOrdersBadge = isOrdersPage && user?.role === UserRole.ADMIN_APPLICATION && pendingOrdersCount > 0;
+          const showWarehouseBadge = isWarehousePage && user?.role === UserRole.ADMIN_APPLICATION && lowStockCount > 0;
 
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
@@ -225,10 +255,27 @@ const DashboardLayout = () => {
                     minWidth: 40,
                   }}
                 >
-                  {showBadge ? (
+                  {showOrdersBadge ? (
                     <Badge
-                      badgeContent={pendingOrdersCount}
+                      badgeContent={pendingOrdersCount > 99 ? '99+' : pendingOrdersCount}
                       color="error"
+                      max={99}
+                      sx={{
+                        '& .MuiBadge-badge': {
+                          fontSize: '0.7rem',
+                          height: 18,
+                          minWidth: 18,
+                          fontWeight: 700,
+                        }
+                      }}
+                    >
+                      {item.icon}
+                    </Badge>
+                  ) : showWarehouseBadge ? (
+                    <Badge
+                      badgeContent={lowStockCount > 99 ? '99+' : lowStockCount}
+                      color="error"
+                      max={99}
                       sx={{
                         '& .MuiBadge-badge': {
                           fontSize: '0.7rem',
@@ -334,8 +381,9 @@ const DashboardLayout = () => {
           >
             {user?.role === UserRole.ADMIN_APPLICATION && pendingOrdersCount > 0 ? (
               <Badge
-                badgeContent={pendingOrdersCount}
+                badgeContent={pendingOrdersCount > 99 ? '99+' : pendingOrdersCount}
                 color="error"
+                max={99}
                 sx={{
                   '& .MuiBadge-badge': {
                     fontSize: '0.65rem',
@@ -360,6 +408,42 @@ const DashboardLayout = () => {
           >
             {navItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
           </Typography>
+
+          {/* Low Stock Alert Icon */}
+          {user?.role === UserRole.ADMIN_APPLICATION && lowStockCount > 0 && (
+            <Tooltip title={`${lowStockCount} Produkt${lowStockCount > 1 ? 'e' : ''} mit niedrigem Bestand`}>
+              <IconButton
+                onClick={() => navigate('/admin/warehouse')}
+                sx={{
+                  mr: 1,
+                  color: 'error.main',
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%': {
+                      transform: 'scale(1)',
+                      opacity: 1,
+                    },
+                    '50%': {
+                      transform: 'scale(1.1)',
+                      opacity: 0.8,
+                    },
+                    '100%': {
+                      transform: 'scale(1)',
+                      opacity: 1,
+                    },
+                  },
+                }}
+              >
+                <Badge
+                  badgeContent={lowStockCount > 99 ? '99+' : lowStockCount}
+                  color="error"
+                  max={99}
+                >
+                  <WarningIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          )}
 
           <IconButton onClick={handleMenuOpen} sx={{ color: 'text.primary' }}>
             <AccountCircle />
