@@ -269,17 +269,17 @@ export const workerLogin = async (data: WorkerLoginDto): Promise<LoginResponse> 
 
   logger.info('Worker logged in', { workerId: worker.id, username: worker.username, patientId: worker.patient_id });
 
-  // 6. Return worker response (slično kao user)
+  // 6. Return worker response (slično kao user) - use camelCase for frontend compatibility
   return {
     user: {
       id: worker.id,
       email: worker.username, // Username umesto email-a
       role: UserRole.WORKER,
-      institution_id: worker.institution_id,
-      patient_id: worker.patient_id || undefined, // Add patient ID to user object (convert null to undefined)
-      is_verified: true, // Workers su uvek verified
-      is_active: worker.is_active,
-      created_at: worker.created_at,
+      institutionId: worker.institution_id, // camelCase for frontend
+      patientId: worker.patient_id || undefined, // camelCase for frontend
+      isVerified: true, // camelCase for frontend
+      isActive: worker.is_active, // camelCase for frontend
+      createdAt: worker.created_at, // camelCase for frontend
     },
     accessToken,
     refreshToken,

@@ -75,15 +75,22 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
       setProducts(productsData);
       setPatients(patientsData);
 
-      // If fixedPatientId is provided, auto-select that patient
+      // Auto-select patient if:
+      // 1. fixedPatientId is provided (for workers)
+      // 2. OR only one patient exists (for workers with one patient)
       if (fixedPatientId) {
         const patient = patientsData.find(p => p.id === fixedPatientId);
         if (patient) {
           setSelectedPatient(patient);
         }
+      } else if (patientsData.length === 1) {
+        // Auto-select if only one patient (typical for workers)
+        setSelectedPatient(patientsData[0]);
       }
     } catch (error: any) {
-      toast.error('Fehler beim Laden der Daten');
+      const errorMsg = error.response?.data?.error || 'Fehler beim Laden der Daten';
+      toast.error(errorMsg);
+      console.error('Error loading data:', error);
     }
   };
 

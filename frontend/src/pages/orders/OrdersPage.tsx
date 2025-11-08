@@ -60,6 +60,7 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<orderApi.OrderStatus | ''>('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest'); // Sort by date
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -144,15 +145,15 @@ const OrdersPage = () => {
       return matchesSearch && matchesMonth && matchesYear;
     })
     .sort((a, b) => {
-      // Priority order: confirmed > pending > shipped > delivered > cancelled
-      const statusPriority: Record<orderApi.OrderStatus, number> = {
-        confirmed: 1,
-        pending: 2,
-        shipped: 3,
-        delivered: 4,
-        cancelled: 5,
-      };
-      return statusPriority[a.status] - statusPriority[b.status];
+      // First sort by date (newest or oldest)
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+
+      if (sortOrder === 'newest') {
+        return dateB - dateA; // Newest first
+      } else {
+        return dateA - dateB; // Oldest first
+      }
     });
 
   // Mark order as confirmed (empfangen/zaprimljeno) - Only for admin_application
@@ -276,7 +277,7 @@ const OrdersPage = () => {
       {/* Filters */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <TextField
               placeholder="Suche nach Firma, Patient oder Bestellungs-ID..."
               value={searchQuery}
@@ -292,7 +293,7 @@ const OrdersPage = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={6} sm={6}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField
               select
               label="Status"
@@ -309,7 +310,20 @@ const OrdersPage = () => {
               <MenuItem value="cancelled">Storniert</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Sortierung</InputLabel>
+              <Select
+                value={sortOrder}
+                label="Sortierung"
+                onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+              >
+                <MenuItem value="newest">Neueste zuerst</MenuItem>
+                <MenuItem value="oldest">Älteste zuerst</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>Monat</InputLabel>
               <Select
@@ -333,7 +347,7 @@ const OrdersPage = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>Jahr</InputLabel>
               <Select
@@ -505,16 +519,30 @@ const OrdersPage = () => {
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
-                  {/* Order Number with Automation Icon */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      Bestellung #{order.order_number}
-                    </Typography>
-                    {order.is_recurring && (
-                      <Tooltip title="Automatische Bestellung">
-                        <LoopIcon sx={{ color: '#2563EB', fontSize: 24 }} />
-                      </Tooltip>
-                    )}
+                  {/* Order Number with Automation Icon and Article Count */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        Bestellung #{order.order_number}
+                      </Typography>
+                      {order.is_recurring && (
+                        <Tooltip title="Automatische Bestellung">
+                          <LoopIcon sx={{ color: '#2563EB', fontSize: 24 }} />
+                        </Tooltip>
+                      )}
+                    </Box>
+                    {/* Article Count Badge */}
+                    <Chip
+                      label={`${order.items.length} ${order.items.length === 1 ? 'Artikel' : 'Artikel'}`}
+                      sx={{
+                        bgcolor: '#2563EB',
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.875rem',
+                        height: 32,
+                        px: 1,
+                      }}
+                    />
                   </Box>
 
                   {/* Status and Date */}
@@ -530,79 +558,65 @@ const OrdersPage = () => {
 
                   {/* Institution Name */}
                   {user?.role === 'admin_application' && order.institution_name && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <BusinessIcon fontSize="small" color="primary" />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 2,
+                        p: 1.5,
+                        bgcolor: '#F0F9FF',
+                        borderRadius: 1,
+                        border: '2px solid #2563EB'
+                      }}
+                    >
+                      <BusinessIcon sx={{ color: '#2563EB', fontSize: 24 }} />
+                      <Typography variant="body1" sx={{ fontWeight: 700, color: '#1E40AF' }}>
                         {order.institution_name}
                       </Typography>
                     </Box>
                   )}
 
-                  {/* Patient Name */}
+                  {/* Patient Name - HIGHLIGHTED */}
                   {order.patient_name && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <PersonIcon fontSize="small" color="action" />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                      <PersonIcon fontSize="small" sx={{ color: '#10B981' }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 50 }}>
+                        Patient:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
                         {order.patient_name}
                       </Typography>
                     </Box>
                   )}
 
-                  {/* Patient Address */}
+                  {/* Patient Address - HIGHLIGHTED */}
                   {order.patient_address && (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-                      <LocationIcon fontSize="small" color="error" />
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'error.main' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                      <LocationIcon fontSize="small" sx={{ color: '#EF4444' }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 50 }}>
+                        Adresse:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 700 }}>
                         {order.patient_address}
                       </Typography>
                     </Box>
                   )}
 
                   {/* Scheduled Delivery Date */}
-                  {order.scheduled_date ? (
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 2,
-                        p: 1.5,
-                        bgcolor: '#FFF4E6',
-                        borderRadius: 1,
-                        border: '2px solid #FF9800'
-                      }}
-                    >
-                      <EventIcon fontSize="medium" sx={{ color: '#F57C00' }} />
-                      <Box>
-                        <Typography variant="caption" sx={{ color: '#F57C00', fontWeight: 600 }}>
-                          LIEFERDATUM:
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 700, color: '#E65100' }}>
-                          {new Date(order.scheduled_date).toLocaleDateString('de-DE', {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 2,
-                        p: 1.5,
-                        bgcolor: '#F5F5F5',
-                        borderRadius: 1,
-                        border: '1px dashed #9E9E9E'
-                      }}
-                    >
-                      <EventIcon fontSize="small" sx={{ color: '#757575' }} />
-                      <Typography variant="caption" sx={{ color: '#757575' }}>
-                        Kein Lieferdatum angegeben
+                  {order.scheduled_date && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                      <EventIcon fontSize="small" sx={{ color: '#FF9800' }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 50 }}>
+                        Lieferung:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 700, color: '#F57C00' }}>
+                        {new Date(order.scheduled_date).toLocaleDateString('de-DE', {
+                          weekday: 'short',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
                       </Typography>
                     </Box>
                   )}
@@ -618,7 +632,7 @@ const OrdersPage = () => {
                   <Divider sx={{ my: 2 }} />
 
                   {/* Products List */}
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, mt: 2 }}>
                     Produkte:
                   </Typography>
                   <Box sx={{ mb: 2 }}>
@@ -632,12 +646,13 @@ const OrdersPage = () => {
                               display: 'flex',
                               justifyContent: 'space-between',
                               py: 0.5,
+                              mb: 0.5,
                             }}
                           >
                             <Typography variant="body2">
                               Unbekanntes Produkt x {item.quantity}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
                               €{Number(item.subtotal).toFixed(2)}
                             </Typography>
                           </Box>
@@ -653,11 +668,13 @@ const OrdersPage = () => {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            py: 0.5,
+                            py: 1,
                             px: 1,
+                            mb: 1,
                             borderRadius: 1,
+                            bgcolor: 'grey.50',
                             '&:hover': {
-                              bgcolor: 'grey.50',
+                              bgcolor: 'grey.100',
                             },
                           }}
                         >
@@ -670,29 +687,31 @@ const OrdersPage = () => {
                                 width: 32,
                                 height: 32,
                                 borderRadius: 1,
-                                bgcolor: `${color}15`,
+                                bgcolor: `${color}20`,
                               }}
                             >
                               <Icon sx={{ color, fontSize: 18 }} />
                             </Box>
                             <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
                                 {product.name_de}
                               </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  {item.quantity} Stück
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#2563EB', fontSize: '1.1rem' }}>
+                                  {item.quantity}x Stück
                                 </Typography>
                                 {product.size && (
                                   <Chip
                                     label={product.size}
-                                    size="small"
                                     sx={{
-                                      height: 18,
-                                      fontSize: '0.65rem',
+                                      height: 28,
+                                      fontSize: '1rem',
                                       fontWeight: 700,
-                                      bgcolor: `${color}20`,
-                                      color: color,
+                                      bgcolor: color,
+                                      color: 'white',
+                                      '& .MuiChip-label': {
+                                        px: 2,
+                                      }
                                     }}
                                   />
                                 )}

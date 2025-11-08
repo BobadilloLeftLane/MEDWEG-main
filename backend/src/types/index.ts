@@ -62,17 +62,17 @@ export interface User {
 }
 
 /**
- * User Response (bez password_hash)
+ * User Response (bez password_hash) - using camelCase for frontend compatibility
  */
 export interface UserResponse {
   id: string;
   email: string;
   role: UserRole;
-  institution_id?: string;
-  patient_id?: string; // For workers - their assigned patient
-  is_verified: boolean;
-  is_active: boolean;
-  created_at: Date;
+  institutionId?: string;
+  patientId?: string; // For workers - their assigned patient
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt: Date;
 }
 
 /**

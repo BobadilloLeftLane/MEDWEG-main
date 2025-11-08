@@ -79,11 +79,14 @@ export const getPatientById = asyncHandler(async (req: Request, res: Response): 
 /**
  * GET /api/v1/patients
  * Get all patients for institution
+ * For workers: returns only their assigned patient
  */
 export const getPatients = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const authReq = req as AuthRequest;
 
   const institutionId = authReq.user?.institutionId;
+  const userRole = authReq.user?.role;
+  const patientId = authReq.user?.patientId; // Worker's assigned patient
 
   if (!institutionId) {
     res.status(403).json({
@@ -96,6 +99,22 @@ export const getPatients = asyncHandler(async (req: Request, res: Response): Pro
   // Query parameter: ?active_only=true/false
   const activeOnly = req.query.active_only !== 'false'; // Default true
 
+  // If user is a worker, return only their assigned patient
+  if (userRole === 'worker' && patientId) {
+    const patient = await patientService.getPatientById(patientId, institutionId);
+    res.status(200).json({
+      success: true,
+      data: [patient], // Return as array for consistency
+      meta: {
+        count: 1,
+        active_only: activeOnly,
+        worker_patient: true,
+      },
+    });
+    return;
+  }
+
+  // For admins: return all patients for institution
   const patients = await patientService.getPatientsByInstitution(institutionId, activeOnly);
 
   res.status(200).json({

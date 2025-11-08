@@ -19,7 +19,8 @@ const poolConfig: PoolConfig = {
   // Connection pool settings
   max: 20, // Maximum broj konekcija
   idleTimeoutMillis: 30000, // 30s idle timeout
-  connectionTimeoutMillis: 2000, // 2s connection timeout
+  connectionTimeoutMillis: 10000, // 10s connection timeout (increased from 2s)
+  statement_timeout: 30000, // 30s statement timeout
 };
 
 // Kreiraj connection pool

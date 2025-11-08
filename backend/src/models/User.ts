@@ -6,17 +6,17 @@ import { User, UserRole, UserResponse } from '../types';
  */
 export class UserModel {
   /**
-   * Convert User to UserResponse (bez password_hash)
+   * Convert User to UserResponse (bez password_hash) - using camelCase for frontend compatibility
    */
   static toResponse(user: User): UserResponse {
     return {
       id: user.id,
       email: user.email,
       role: user.role,
-      institution_id: user.institution_id,
-      is_verified: user.is_verified,
-      is_active: user.is_active,
-      created_at: user.created_at,
+      institutionId: user.institution_id,
+      isVerified: user.is_verified,
+      isActive: user.is_active,
+      createdAt: user.created_at,
     };
   }
 
