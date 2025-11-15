@@ -14,7 +14,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from '@mui/material';
-import { Visibility, VisibilityOff, Login as LoginIcon, Person, Work } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Login as LoginIcon, Person, Work, ArrowBack } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -174,6 +174,24 @@ const LoginPage = () => {
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
           }}
         >
+          {/* Back to Landing Page */}
+          <Button
+            component={RouterLink}
+            to="/"
+            startIcon={<ArrowBack />}
+            sx={{
+              mb: 3,
+              color: 'text.secondary',
+              textTransform: 'none',
+              '&:hover': {
+                color: 'primary.main',
+                bgcolor: 'transparent',
+              },
+            }}
+          >
+            Zurück zur Startseite
+          </Button>
+
           {/* Logo & Title */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Box
@@ -232,7 +250,7 @@ const LoginPage = () => {
               </ToggleButton>
               <ToggleButton value="worker" aria-label="Worker Login">
                 <Work sx={{ mr: 1 }} />
-                Worker
+                Mitarbeiter
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>

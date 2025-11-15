@@ -54,3 +54,26 @@ export const refreshAccessToken = async (refreshToken: string): Promise<{ access
   });
   return response.data.data;
 };
+
+/**
+ * Register Institution
+ */
+export interface RegisterRequest {
+  institutionName: string;
+  email: string;
+  password: string;
+  addressStreet: string;
+  addressPlz: string;
+  addressCity: string;
+  phone: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  email: string;
+}
+
+export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
+  const response = await apiClient.post<ApiResponse<RegisterResponse>>('/auth/register', data);
+  return response.data.data;
+};

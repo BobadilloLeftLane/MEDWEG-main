@@ -1,0 +1,14 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light blue rounded rectangle background -->
+  <rect x="50" y="50" width="300" height="200" rx="30" fill="#7DD3FC"/>
+
+  <!-- Dark blue M letter -->
+  <path d="M 120 190 L 120 110 L 145 160 L 170 110 L 170 190 L 155 190 L 155 140 L 145 170 L 135 140 L 135 190 Z"
+        fill="#1E3A8A"
+        stroke="#1E3A8A"
+        stroke-width="3"/>
+
+  <!-- Yellow-green play icon (triangle) -->
+  <path d="M 200 110 L 290 150 L 200 190 Z"
+        fill="#D4F534"/>
+</svg>

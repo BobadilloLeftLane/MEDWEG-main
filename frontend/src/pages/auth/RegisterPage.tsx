@@ -18,6 +18,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
+import { register } from '../../api/authApi';
 
 /**
  * Register Form Validation Schema
@@ -66,7 +67,7 @@ const RegisterPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const {
-    register,
+    register: registerForm,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
@@ -78,17 +79,12 @@ const RegisterPage = () => {
     setErrorMessage('');
 
     try {
-      // TODO: Implement API call to backend
-      // const response = await authApi.register(data);
+      // Call real backend API
+      const response = await register(data);
 
-      // Temporary mock registration
-      console.log('Register data:', data);
+      toast.success(response.message || 'Registrierung erfolgreich! Bitte melden Sie sich an.');
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock successful registration
-      toast.success('Registrierung erfolgreich! Bitte melden Sie sich an.');
+      // Navigate to login page
       navigate('/login');
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.';
@@ -169,7 +165,7 @@ const RegisterPage = () => {
               {/* Institution Name */}
               <Grid item xs={12}>
                 <TextField
-                  {...register('institutionName')}
+                  {...registerForm('institutionName')}
                   label="Institutionsname"
                   fullWidth
                   error={!!errors.institutionName}
@@ -182,7 +178,7 @@ const RegisterPage = () => {
               {/* Email */}
               <Grid item xs={12}>
                 <TextField
-                  {...register('email')}
+                  {...registerForm('email')}
                   label="E-Mail"
                   type="email"
                   fullWidth
@@ -195,7 +191,7 @@ const RegisterPage = () => {
               {/* Password */}
               <Grid item xs={12} sm={6}>
                 <TextField
-                  {...register('password')}
+                  {...registerForm('password')}
                   label="Passwort"
                   type={showPassword ? 'text' : 'password'}
                   fullWidth
@@ -220,7 +216,7 @@ const RegisterPage = () => {
               {/* Confirm Password */}
               <Grid item xs={12} sm={6}>
                 <TextField
-                  {...register('confirmPassword')}
+                  {...registerForm('confirmPassword')}
                   label="Passwort bestätigen"
                   type={showConfirmPassword ? 'text' : 'password'}
                   fullWidth
@@ -245,7 +241,7 @@ const RegisterPage = () => {
               {/* Address Street */}
               <Grid item xs={12}>
                 <TextField
-                  {...register('addressStreet')}
+                  {...registerForm('addressStreet')}
                   label="Straße und Hausnummer"
                   fullWidth
                   error={!!errors.addressStreet}
@@ -257,7 +253,7 @@ const RegisterPage = () => {
               {/* PLZ */}
               <Grid item xs={12} sm={4}>
                 <TextField
-                  {...register('addressPlz')}
+                  {...registerForm('addressPlz')}
                   label="PLZ"
                   fullWidth
                   error={!!errors.addressPlz}
@@ -269,7 +265,7 @@ const RegisterPage = () => {
               {/* City */}
               <Grid item xs={12} sm={8}>
                 <TextField
-                  {...register('addressCity')}
+                  {...registerForm('addressCity')}
                   label="Stadt"
                   fullWidth
                   error={!!errors.addressCity}
@@ -281,7 +277,7 @@ const RegisterPage = () => {
               {/* Phone */}
               <Grid item xs={12}>
                 <TextField
-                  {...register('phone')}
+                  {...registerForm('phone')}
                   label="Telefonnummer"
                   fullWidth
                   error={!!errors.phone}

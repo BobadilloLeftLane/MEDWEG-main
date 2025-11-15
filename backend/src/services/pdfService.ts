@@ -12,7 +12,7 @@ import { pool } from '../config/database';
 
 // Company info - MEDWEG
 const COMPANY_INFO = {
-  name: 'MEDWEG GmbH',
+  name: 'MEDWEG',
   address: 'Musterstraße 123',
   city: '10115 Berlin',
   country: 'Deutschland',

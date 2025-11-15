@@ -51,15 +51,40 @@ export const findInstitutionByName = async (name: string): Promise<Institution |
 
 /**
  * Verify institution
+ * Also verifies the email of the admin_institution user
  */
 export const verifyInstitution = async (id: string): Promise<void> => {
-  await pool.query(
-    `UPDATE institutions
-    SET is_verified = true,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = $1`,
-    [id]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Verify the institution
+    await client.query(
+      `UPDATE institutions
+      SET is_verified = true,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1`,
+      [id]
+    );
+
+    // Verify the admin_institution user for this institution
+    await client.query(
+      `UPDATE users
+      SET is_verified = true,
+          is_email_verified = true,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE institution_id = $1
+        AND role = 'admin_institution'`,
+      [id]
+    );
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /**

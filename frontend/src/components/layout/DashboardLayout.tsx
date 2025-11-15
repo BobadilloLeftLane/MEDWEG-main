@@ -198,19 +198,18 @@ const DashboardLayout = () => {
         }}
       >
         <Box
+          component="img"
+          src="/medwegbavaria_logo.jpg"
+          alt="MEDWEG Logo"
           sx={{
-            width: 48,
             height: 48,
+            width: 48,
+            objectFit: 'contain',
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.9)',
+            padding: 0.5,
           }}
-        >
-          <Dashboard sx={{ color: 'white', fontSize: 28 }} />
-        </Box>
+        />
         <Typography
           variant="h5"
           sx={{

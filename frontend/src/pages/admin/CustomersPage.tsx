@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -112,53 +112,85 @@ const CustomersPage = () => {
     event: React.MouseEvent<HTMLElement>,
     institution: institutionApi.Institution
   ) => {
+    console.log('Menu opened for institution:', institution);
     setAnchorEl(event.currentTarget);
     setSelectedInstitution(institution);
   };
 
   const handleMenuClose = () => {
+    console.log('Menu closed');
     setAnchorEl(null);
     setSelectedInstitution(null);
   };
 
   // Verify institution
   const handleVerifyClick = () => {
+    console.log('Verify clicked, selectedInstitution:', selectedInstitution);
+    // Don't close menu or clear selectedInstitution yet - just open the dialog
+    setAnchorEl(null); // Close menu but keep selectedInstitution
     setVerifyDialogOpen(true);
-    handleMenuClose();
   };
 
   const handleVerifyConfirm = async () => {
-    if (!selectedInstitution) return;
+    console.log('Verify confirm clicked, selectedInstitution:', selectedInstitution);
+    if (!selectedInstitution) {
+      console.log('No selected institution, returning');
+      return;
+    }
 
     try {
+      console.log('Calling verifyInstitution API for ID:', selectedInstitution.id);
       await institutionApi.verifyInstitution(selectedInstitution.id);
+      console.log('Verification successful');
       toast.success('Kunde erfolgreich verifiziert');
-      loadData();
       setVerifyDialogOpen(false);
       setSelectedInstitution(null);
+      await loadData();
     } catch (error: any) {
+      console.error('Verification error:', error);
       toast.error(error.response?.data?.error || 'Fehler beim Verifizieren');
     }
   };
 
+  const handleVerifyCancel = () => {
+    console.log('Verify cancelled');
+    setVerifyDialogOpen(false);
+    setSelectedInstitution(null);
+  };
+
   // Deactivate institution
   const handleDeactivateClick = () => {
+    console.log('Deactivate clicked, selectedInstitution:', selectedInstitution);
+    // Don't close menu or clear selectedInstitution yet - just open the dialog
+    setAnchorEl(null); // Close menu but keep selectedInstitution
     setDeactivateDialogOpen(true);
-    handleMenuClose();
   };
 
   const handleDeactivateConfirm = async () => {
-    if (!selectedInstitution) return;
+    console.log('Deactivate confirm clicked, selectedInstitution:', selectedInstitution);
+    if (!selectedInstitution) {
+      console.log('No selected institution, returning');
+      return;
+    }
 
     try {
+      console.log('Calling deactivateInstitution API for ID:', selectedInstitution.id);
       await institutionApi.deactivateInstitution(selectedInstitution.id);
+      console.log('Deactivation successful');
       toast.success('Kunde erfolgreich deaktiviert');
-      loadData();
       setDeactivateDialogOpen(false);
       setSelectedInstitution(null);
+      await loadData();
     } catch (error: any) {
+      console.error('Deactivation error:', error);
       toast.error(error.response?.data?.error || 'Fehler beim Deaktivieren');
     }
+  };
+
+  const handleDeactivateCancel = () => {
+    console.log('Deactivate cancelled');
+    setDeactivateDialogOpen(false);
+    setSelectedInstitution(null);
   };
 
   return (
@@ -219,8 +251,8 @@ const CustomersPage = () => {
                 const hasPatients = patientData && patientData.patient_count > 0;
 
                 return (
-                  <>
-                    <TableRow key={institution.id} hover>
+                  <React.Fragment key={institution.id}>
+                    <TableRow hover>
                       <TableCell>
                         {hasPatients && (
                           <IconButton
@@ -330,7 +362,7 @@ const CustomersPage = () => {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </TableBody>
@@ -355,7 +387,7 @@ const CustomersPage = () => {
       </Menu>
 
       {/* Verify Dialog */}
-      <Dialog open={verifyDialogOpen} onClose={() => setVerifyDialogOpen(false)}>
+      <Dialog open={verifyDialogOpen} onClose={handleVerifyCancel}>
         <DialogTitle>Kunde verifizieren?</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -364,7 +396,7 @@ const CustomersPage = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setVerifyDialogOpen(false)}>Abbrechen</Button>
+          <Button onClick={handleVerifyCancel}>Abbrechen</Button>
           <Button onClick={handleVerifyConfirm} color="primary" variant="contained">
             Verifizieren
           </Button>
@@ -372,7 +404,7 @@ const CustomersPage = () => {
       </Dialog>
 
       {/* Deactivate Dialog */}
-      <Dialog open={deactivateDialogOpen} onClose={() => setDeactivateDialogOpen(false)}>
+      <Dialog open={deactivateDialogOpen} onClose={handleDeactivateCancel}>
         <DialogTitle>Kunde deaktivieren?</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -381,7 +413,7 @@ const CustomersPage = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeactivateDialogOpen(false)}>Abbrechen</Button>
+          <Button onClick={handleDeactivateCancel}>Abbrechen</Button>
           <Button onClick={handleDeactivateConfirm} color="error" variant="contained">
             Deaktivieren
           </Button>

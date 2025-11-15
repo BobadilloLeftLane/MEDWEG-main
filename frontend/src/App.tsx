@@ -1,23 +1,37 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Box, CircularProgress } from '@mui/material';
+import { UserRole } from './store/authStore';
+
+// Eager load only authentication components for fast initial load
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
-import DashboardLayout from './components/layout/DashboardLayout';
-import DashboardHome from './pages/dashboard/DashboardHome';
-import PatientsPage from './pages/patients/PatientsPage';
-import ProductsPage from './pages/products/ProductsPage';
-import OrdersPage from './pages/orders/OrdersPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import InstitutionDashboard from './pages/institution/InstitutionDashboard';
-import RecurringOrdersPage from './pages/institution/RecurringOrdersPage';
-import CustomersPage from './pages/admin/CustomersPage';
-import CalculatorPage from './pages/admin/CalculatorPage';
-import WarehousePage from './pages/admin/WarehousePage';
-import TransportPage from './pages/admin/TransportPage';
-import DocumentationPage from './pages/admin/DocumentationPage';
-import WorkerDashboard from './pages/worker/WorkerDashboard';
+import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
-import { UserRole } from './store/authStore';
+import DashboardLayout from './components/layout/DashboardLayout';
+
+// Lazy load all other pages for better performance
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const CustomersPage = lazy(() => import('./pages/admin/CustomersPage'));
+const WarehousePage = lazy(() => import('./pages/admin/WarehousePage'));
+const TransportPage = lazy(() => import('./pages/admin/TransportPage'));
+const DocumentationPage = lazy(() => import('./pages/admin/DocumentationPage'));
+const CalculatorPage = lazy(() => import('./pages/admin/CalculatorPage'));
+const InstitutionDashboard = lazy(() => import('./pages/institution/InstitutionDashboard'));
+const RecurringOrdersPage = lazy(() => import('./pages/institution/RecurringOrdersPage'));
+const PatientsPage = lazy(() => import('./pages/patients/PatientsPage'));
+const ProductsPage = lazy(() => import('./pages/products/ProductsPage'));
+const OrdersPage = lazy(() => import('./pages/orders/OrdersPage'));
+const DashboardHome = lazy(() => import('./pages/dashboard/DashboardHome'));
+const WorkerDashboard = lazy(() => import('./pages/worker/WorkerDashboard'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+    <CircularProgress />
+  </Box>
+);
 
 function App() {
   return (
@@ -54,14 +68,14 @@ function App() {
         }
       >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="customers" element={<CustomersPage />} />
-        <Route path="products" element={<ProductsPage />} />
-        <Route path="orders" element={<OrdersPage />} />
-        <Route path="calculator" element={<CalculatorPage />} />
-        <Route path="warehouse" element={<WarehousePage />} />
-        <Route path="transport" element={<TransportPage />} />
-        <Route path="documentation" element={<DocumentationPage />} />
+        <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>} />
+        <Route path="customers" element={<Suspense fallback={<PageLoader />}><CustomersPage /></Suspense>} />
+        <Route path="products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
+        <Route path="orders" element={<Suspense fallback={<PageLoader />}><OrdersPage /></Suspense>} />
+        <Route path="calculator" element={<Suspense fallback={<PageLoader />}><CalculatorPage /></Suspense>} />
+        <Route path="warehouse" element={<Suspense fallback={<PageLoader />}><WarehousePage /></Suspense>} />
+        <Route path="transport" element={<Suspense fallback={<PageLoader />}><TransportPage /></Suspense>} />
+        <Route path="documentation" element={<Suspense fallback={<PageLoader />}><DocumentationPage /></Suspense>} />
       </Route>
 
       {/* ==================== ADMIN INSTITUTION ROUTES ==================== */}
@@ -75,11 +89,11 @@ function App() {
         }
       >
         <Route index element={<Navigate to="/institution/dashboard" replace />} />
-        <Route path="dashboard" element={<InstitutionDashboard />} />
-        <Route path="patients" element={<PatientsPage />} />
-        <Route path="products" element={<ProductsPage />} />
-        <Route path="orders" element={<OrdersPage />} />
-        <Route path="recurring-orders" element={<RecurringOrdersPage />} />
+        <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><InstitutionDashboard /></Suspense>} />
+        <Route path="patients" element={<Suspense fallback={<PageLoader />}><PatientsPage /></Suspense>} />
+        <Route path="products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
+        <Route path="orders" element={<Suspense fallback={<PageLoader />}><OrdersPage /></Suspense>} />
+        <Route path="recurring-orders" element={<Suspense fallback={<PageLoader />}><RecurringOrdersPage /></Suspense>} />
       </Route>
 
       {/* ==================== WORKER ROUTES ==================== */}
@@ -88,7 +102,9 @@ function App() {
         path="/worker/dashboard"
         element={
           <ProtectedRoute allowedRoles={[UserRole.WORKER]}>
-            <WorkerDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <WorkerDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -103,18 +119,18 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardHome />} />
-        <Route path="patients" element={<PatientsPage />} />
-        <Route path="products" element={<ProductsPage />} />
-        <Route path="orders" element={<OrdersPage />} />
+        <Route index element={<Suspense fallback={<PageLoader />}><DashboardHome /></Suspense>} />
+        <Route path="patients" element={<Suspense fallback={<PageLoader />}><PatientsPage /></Suspense>} />
+        <Route path="products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
+        <Route path="orders" element={<Suspense fallback={<PageLoader />}><OrdersPage /></Suspense>} />
       </Route>
 
       {/* ==================== FALLBACK ROUTES ==================== */}
-      {/* Redirect root to login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Landing page - public home page */}
+      <Route path="/" element={<LandingPage />} />
 
-      {/* 404 - Redirect to login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* 404 - Redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
