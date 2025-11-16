@@ -97,6 +97,66 @@ const LandingFooter = () => {
             © {new Date().getFullYear()} MEDWEG. Alle Rechte vorbehalten.
           </Typography>
         </Box>
+
+        {/* Developer Credit */}
+        <Box
+          sx={{
+            textAlign: 'center',
+            mt: 3,
+            pt: 3,
+            borderTop: '1px solid',
+            borderColor: 'grey.800',
+          }}
+        >
+          <Link
+            href="https://www.novastudiosolutions.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1.5,
+              flexWrap: 'wrap',
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+              },
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'grey.400',
+                fontSize: '0.875rem',
+              }}
+            >
+              Developed by
+            </Typography>
+            <Box
+              component="img"
+              src="/nova-studio-logo.png"
+              alt="Nova Studio Solutions"
+              sx={{
+                height: 35,
+                objectFit: 'contain',
+                borderRadius: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                letterSpacing: '0.5px',
+              }}
+            >
+              Nova Studio Solutions
+            </Typography>
+          </Link>
+        </Box>
       </Container>
     </Box>
   );

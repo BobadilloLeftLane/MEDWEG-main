@@ -27,6 +27,12 @@ import {
   List,
   ListItem,
   ListItemText,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Business as BusinessIcon,
@@ -50,6 +56,8 @@ import * as adminApi from '../../api/adminApi';
  * Display and manage institutions with patient information - admin_application only
  */
 const CustomersPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [institutions, setInstitutions] = useState<institutionApi.Institution[]>([]);
   const [patientsData, setPatientsData] = useState<adminApi.PatientsByInstitution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -269,13 +277,13 @@ const CustomersPage = () => {
     <Box>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           Kundenverwaltung
         </Typography>
       </Box>
 
       {/* Search */}
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Paper sx={{ p: { xs: 1.5, sm: 2 }, mb: 3 }}>
         <TextField
           placeholder="Suche nach Firmenname..."
           value={searchQuery}
@@ -292,7 +300,7 @@ const CustomersPage = () => {
         />
       </Paper>
 
-      {/* Institutions Table */}
+      {/* Institutions - Mobile Cards / Desktop Table */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -301,7 +309,145 @@ const CustomersPage = () => {
         <Alert severity="info">
           {searchQuery ? 'Keine Kunden gefunden.' : 'Noch keine Kunden registriert.'}
         </Alert>
+      ) : isMobile ? (
+        // MOBILE: Card View
+        <Box>
+          {filteredInstitutions.map((institution) => {
+            const patientData = getPatientData(institution.id);
+            const isExpanded = expandedRows.has(institution.id);
+            const hasPatients = patientData && patientData.patient_count > 0;
+
+            return (
+              <Card key={institution.id} sx={{ mb: 2 }}>
+                <CardContent>
+                  {/* Header with Company Name and Icon */}
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                      <BusinessIcon color="primary" />
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {institution.name}
+                      </Typography>
+                    </Box>
+                    <IconButton size="small" onClick={(e) => handleMenuOpen(e, institution)}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+
+                  {/* Location */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <LocationIcon fontSize="small" color="action" />
+                    <Typography variant="body2" color="text.secondary">
+                      {institution.address_plz} {institution.address_city}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Details Grid */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Patienten
+                      </Typography>
+                      <Box sx={{ mt: 0.5 }}>
+                        <Chip
+                          icon={<PersonIcon />}
+                          label={patientData?.patient_count || 0}
+                          color={hasPatients ? 'primary' : 'default'}
+                          size="small"
+                        />
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Registriert am
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                        {new Date(institution.created_at).toLocaleDateString('de-DE')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Verifiziert
+                      </Typography>
+                      <Box sx={{ mt: 0.5 }}>
+                        <Chip
+                          icon={institution.is_verified ? <CheckCircleIcon /> : undefined}
+                          label={institution.is_verified ? 'Verifiziert' : 'Nicht verifiziert'}
+                          color={institution.is_verified ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Status
+                      </Typography>
+                      <Box sx={{ mt: 0.5 }}>
+                        <Chip
+                          label={institution.is_active ? 'Aktiv' : 'Inaktiv'}
+                          color={institution.is_active ? 'success' : 'default'}
+                          size="small"
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  {/* Patients List (Expandable) */}
+                  {hasPatients && (
+                    <>
+                      <Divider sx={{ my: 2 }} />
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        onClick={() => handleToggleExpand(institution.id)}
+                        endIcon={isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      >
+                        Patienten anzeigen ({patientData!.patient_count})
+                      </Button>
+                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                        <Box sx={{ mt: 2 }}>
+                          <List dense>
+                            {patientData!.patients.map((patient, index) => (
+                              <ListItem
+                                key={patient.id}
+                                sx={{
+                                  bgcolor: 'grey.50',
+                                  mb: 1,
+                                  borderRadius: 1,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                }}
+                              >
+                                <ListItemText
+                                  primary={
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                      {index + 1}. {patient.first_name} {patient.last_name}
+                                    </Typography>
+                                  }
+                                  secondary={
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                      <LocationIcon fontSize="small" sx={{ fontSize: 16 }} />
+                                      <Typography variant="caption" color="text.secondary">
+                                        {patient.address || 'Keine Adresse hinterlegt'}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Box>
+                      </Collapse>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Box>
       ) : (
+        // DESKTOP: Table View
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

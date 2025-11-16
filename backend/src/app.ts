@@ -139,6 +139,7 @@ import institutionRoutes from './routes/institution.routes';
 import adminRoutes from './routes/admin.routes';
 import warehouseRoutes from './routes/warehouse.routes';
 import recurringOrderRoutes from './routes/recurringOrder.routes';
+import contactRoutes from './routes/contact.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { startScheduledJobs } from './services/scheduledOrderService';
 
@@ -153,6 +154,7 @@ app.use(`/api/${API_VERSION}/institutions`, institutionRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/warehouse`, warehouseRoutes);
 app.use(`/api/${API_VERSION}/recurring-orders`, recurringOrderRoutes);
+app.use(`/api/${API_VERSION}/contact`, contactRoutes); // Public contact form endpoint
 
 /**
  * 404 Handler

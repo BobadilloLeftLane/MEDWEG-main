@@ -1,16 +1,35 @@
 {
-  "name": "MEDWEG",
+  "name": "MEDWEG Bavaria",
   "short_name": "MEDWEG",
-  "description": "MEDWEG - Pflegedienst Management System",
+  "description": "MEDWEG - B2B Medical Supplies Platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563EB",
+  "theme_color": "#1976d2",
   "icons": [
     {
       "src": "/favicon.ico",
-      "sizes": "any",
-      "type": "image/x-icon"
+      "sizes": "64x64",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

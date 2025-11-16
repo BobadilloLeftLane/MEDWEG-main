@@ -21,6 +21,11 @@ import {
   DialogActions,
   Grid,
   CircularProgress,
+  Card,
+  CardContent,
+  Divider,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Add,
@@ -64,6 +69,9 @@ type PatientFormData = z.infer<typeof patientSchema>;
  * Patient management with CRUD operations using real API
  */
 const PatientsPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -300,12 +308,12 @@ const PatientsPage = () => {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 3, gap: { xs: 2, sm: 0 } }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
             Patienten
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.85rem', sm: '0.875rem' } }}>
             {loading ? 'Laden...' : `${filteredPatients.length} Patienten insgesamt`}
           </Typography>
         </Box>
@@ -313,6 +321,7 @@ const PatientsPage = () => {
           variant="contained"
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
+          fullWidth={{ xs: true, sm: false }}
           sx={{
             background: 'linear-gradient(135deg, #2563EB 0%, #10B981 100%)',
             '&:hover': {
@@ -325,7 +334,7 @@ const PatientsPage = () => {
       </Box>
 
       {/* Search Bar */}
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Paper sx={{ p: { xs: 1.5, sm: 2 }, mb: 3 }}>
         <TextField
           fullWidth
           placeholder="Patienten suchen..."
@@ -374,18 +383,204 @@ const PatientsPage = () => {
             </Button>
           )}
         </Paper>
+      ) : isMobile ? (
+        /* Mobile Card View */
+        <Box>
+          {filteredPatients
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((patient) => (
+              <Card key={patient.id} sx={{ mb: 2 }}>
+                <CardContent>
+                  {/* Header with ID and Actions */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Chip
+                      label={patient.uniqueCode}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                    <Box>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDialog(patient)}
+                        color="primary"
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDelete(patient.id)}
+                        color="error"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+
+                  {/* Patient Name */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Person color="action" />
+                    <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 600 }}>
+                      {patient.firstName} {patient.lastName}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Details */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Geburtsdatum
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {new Date(patient.dateOfBirth).toLocaleDateString('de-DE')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Adresse
+                      </Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {patient.address || '-'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Worker Section */}
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                    Worker Zugangsdaten
+                  </Typography>
+                  {loadingWorkers ? (
+                    <CircularProgress size={20} />
+                  ) : newCredentialsMap.has(patient.id) ? (
+                    <Box sx={{ bgcolor: 'success.light', p: 2, borderRadius: 1, border: '2px solid', borderColor: 'success.main' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                        <CheckCircle sx={{ fontSize: 18, color: 'success.dark' }} />
+                        <Typography variant="caption" fontWeight={700} color="success.dark">
+                          NEUE ZUGANGSDATEN
+                        </Typography>
+                      </Box>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Benutzername:
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
+                          {newCredentialsMap.get(patient.id)?.username}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Passwort:
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} sx={{ fontFamily: 'monospace', color: 'error.main' }}>
+                          {newCredentialsMap.get(patient.id)?.password}
+                        </Typography>
+                      </Box>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Refresh fontSize="small" />}
+                        onClick={() =>
+                          handleRegenerateWorker(
+                            workersMap.get(patient.id)!.id,
+                            patient.id,
+                            `${patient.firstName} ${patient.lastName}`
+                          )
+                        }
+                        fullWidth
+                      >
+                        Neu generieren
+                      </Button>
+                    </Box>
+                  ) : workersMap.has(patient.id) ? (
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <CheckCircle sx={{ fontSize: 18, color: 'success.main' }} />
+                        <Typography variant="body2" fontWeight={600}>
+                          {workersMap.get(patient.id)?.username}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            handleTogglePasswordVisibility(
+                              workersMap.get(patient.id)!.id,
+                              patient.id
+                            )
+                          }
+                        >
+                          {visiblePasswordMap.has(patient.id) ? (
+                            <VisibilityOff fontSize="small" />
+                          ) : (
+                            <Visibility fontSize="small" />
+                          )}
+                        </IconButton>
+                      </Box>
+                      {visiblePasswordMap.has(patient.id) && (
+                        <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'error.main', fontWeight: 700, display: 'block', mb: 1 }}>
+                          {visiblePasswordMap.get(patient.id)}
+                        </Typography>
+                      )}
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Refresh fontSize="small" />}
+                        onClick={() =>
+                          handleRegenerateWorker(
+                            workersMap.get(patient.id)!.id,
+                            patient.id,
+                            `${patient.firstName} ${patient.lastName}`
+                          )
+                        }
+                        fullWidth
+                      >
+                        Neu generieren
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      startIcon={<PersonAdd fontSize="small" />}
+                      onClick={() => handleGenerateWorker(patient.id, `${patient.firstName} ${patient.lastName}`)}
+                      fullWidth
+                    >
+                      Zugangsdaten erstellen
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <TablePagination
+              component="div"
+              count={filteredPatients.length}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              labelRowsPerPage="Zeilen:"
+            />
+          </Box>
+        </Box>
       ) : (
-        /* Patients Table */
+        /* Desktop Table View */
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>Patient ID</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Geburtsdatum</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Adresse</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Worker</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>Patient ID</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>Geburtsdatum</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>Adresse</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>Worker</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} align="right">
                   Aktionen
                 </TableCell>
               </TableRow>
@@ -402,25 +597,26 @@ const PatientsPage = () => {
                       },
                     }}
                   >
-                    <TableCell>
+                    <TableCell sx={{ py: { xs: 1.5, md: 2 } }}>
                       <Chip
                         label={patient.uniqueCode}
                         size="small"
                         color="primary"
                         variant="outlined"
+                        sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: { xs: 1.5, md: 2 } }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Person color="action" />
-                        <Typography variant="body2" fontWeight={500}>
+                        <Person color="action" sx={{ fontSize: { xs: 18, sm: 20, md: 24 } }} />
+                        <Typography variant="body2" fontWeight={500} sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                           {patient.firstName} {patient.lastName}
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>{new Date(patient.dateOfBirth).toLocaleDateString('de-DE')}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{patient.address || '-'}</Typography>
+                    <TableCell sx={{ py: { xs: 1.5, md: 2 }, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>{new Date(patient.dateOfBirth).toLocaleDateString('de-DE')}</TableCell>
+                    <TableCell sx={{ py: { xs: 1.5, md: 2 } }}>
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>{patient.address || '-'}</Typography>
                     </TableCell>
                     <TableCell>
                       {loadingWorkers ? (

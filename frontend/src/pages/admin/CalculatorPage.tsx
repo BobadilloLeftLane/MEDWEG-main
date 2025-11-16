@@ -25,6 +25,8 @@ import {
   Select,
   FormControl,
   InputLabel,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Calculate as CalculateIcon,
@@ -97,6 +99,8 @@ interface OrderCalculation {
 }
 
 const CalculatorPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [orders, setOrders] = useState<orderApi.Order[]>([]);
   const [calculations, setCalculations] = useState<OrderCalculation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -432,13 +436,14 @@ const CalculatorPage = () => {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 2, gap: { xs: 2, sm: 0 } }}>
           <Box>
             <Typography
               variant="h4"
               sx={{
                 fontWeight: 700,
                 mb: 1,
+                fontSize: { xs: '1.75rem', sm: '2.125rem' },
                 background: 'linear-gradient(135deg, #2563EB 0%, #10B981 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
@@ -447,7 +452,7 @@ const CalculatorPage = () => {
             >
               Kalkulator
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
               Monatliche Gewinnberechnung mit Versandkostenoptimierung
             </Typography>
           </Box>
@@ -456,15 +461,16 @@ const CalculatorPage = () => {
             startIcon={<RefreshIcon />}
             onClick={loadOrdersAndCalculate}
             disabled={loading}
+            fullWidth={{ xs: true, sm: false }}
           >
             Aktualisieren
           </Button>
         </Box>
 
         {/* Date Filter */}
-        <Paper sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-          <CalendarIcon sx={{ color: 'primary.main', fontSize: 28 }} />
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+        <Paper sx={{ p: { xs: 1.5, sm: 2 }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'center' } }}>
+          <CalendarIcon sx={{ color: 'primary.main', fontSize: 28, display: { xs: 'none', sm: 'block' } }} />
+          <FormControl size="small" fullWidth={{ xs: true, sm: false }} sx={{ minWidth: { sm: 150 } }}>
             <InputLabel>Monat</InputLabel>
             <Select
               value={selectedMonth}
@@ -485,7 +491,7 @@ const CalculatorPage = () => {
               <MenuItem value={12}>Dezember</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
+          <FormControl size="small" fullWidth={{ xs: true, sm: false }} sx={{ minWidth: { sm: 120 } }}>
             <InputLabel>Jahr</InputLabel>
             <Select
               value={selectedYear}
@@ -497,7 +503,7 @@ const CalculatorPage = () => {
               ))}
             </Select>
           </FormControl>
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ ml: { sm: 2 } }}>
             {orders.length} {orders.length === 1 ? 'Bestellung' : 'Bestellungen'}
           </Typography>
         </Paper>
@@ -506,148 +512,292 @@ const CalculatorPage = () => {
       <Grid container spacing={3}>
         {/* Main Content */}
         <Grid item xs={12} md={8}>
-          {/* Orders Table */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+          {/* Orders - Mobile Cards / Desktop Table */}
+          <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' } }}>
               Bestellungen Kalkulation
             </Typography>
 
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Bestellung</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Gewicht</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Einkauf</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Verkauf</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Versand</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Gewinn</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {calculations.map((calc) => {
-                    const order = orders.find(o => o.id === calc.orderId);
-                    const isShipped = order?.status === 'shipped';
-                    const isDelivered = order?.status === 'delivered';
+            {isMobile ? (
+              // MOBILE: Card View
+              <Box>
+                {calculations.map((calc) => {
+                  const order = orders.find(o => o.id === calc.orderId);
+                  const isShipped = order?.status === 'shipped';
+                  const isDelivered = order?.status === 'delivered';
 
-                    return (
-                      <TableRow
-                        key={calc.orderId}
-                        hover
-                        sx={{
-                          bgcolor: isDelivered ? 'grey.200' : (isShipped ? 'grey.100' : 'transparent'),
-                          opacity: (isShipped || isDelivered) ? 0.75 : 1,
-                        }}
-                      >
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            #{calc.orderNumber}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            ID: {calc.orderId.slice(0, 8)}
-                          </Typography>
-                          {isShipped && (
-                            <Chip
-                              label="Gesendet"
-                              size="small"
-                              color="primary"
-                              sx={{ mt: 0.5, fontSize: '0.65rem' }}
-                            />
-                          )}
-                          {isDelivered && (
-                            <Chip
-                              label="Geliefert"
-                              size="small"
-                              color="success"
-                              sx={{ mt: 0.5, fontSize: '0.65rem' }}
-                            />
-                          )}
-                        </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {Number(calc.totalWeight || 0).toFixed(2)} kg
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          €{Number(calc.purchaseCost || 0).toFixed(2)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
-                          €{Number(calc.revenue || 0).toFixed(2)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                            €{Number(calc.shippingCost || 0).toFixed(2)}
-                          </Typography>
-
-                          {/* If shipped or delivered - show only selected shipping (locked) */}
-                          {(isShipped || isDelivered) && order?.selected_shipping_carrier ? (
-                            <Chip
-                              icon={<RadioCheckedIcon />}
-                              label={`${order.selected_shipping_carrier} (€${Number(order.selected_shipping_price || 0).toFixed(2)})`}
-                              size="small"
-                              color="success"
-                              sx={{ fontSize: '0.7rem', fontWeight: 600 }}
-                            />
-                          ) : (
-                            /* Not shipped/delivered - show options to select */
-                            calc.bestShipping.length > 0 && (
-                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                {calc.bestShipping.map((option, idx) => {
-                                  const isSelected = order?.selected_shipping_carrier === option.carrier &&
-                                                     order?.selected_shipping_price === option.price;
-
-                                  return (
-                                    <Box
-                                      key={idx}
-                                      sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 0.5,
-                                        cursor: 'pointer',
-                                        '&:hover': {
-                                          opacity: 0.8,
-                                        }
-                                      }}
-                                      onClick={() => handleSelectShipping(calc.orderId, option)}
-                                    >
-                                      {isSelected ? (
-                                        <RadioCheckedIcon sx={{ fontSize: 16, color: 'success.main' }} />
-                                      ) : (
-                                        <RadioUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                                      )}
-                                      <Chip
-                                        label={`${option.carrier} - ${option.packageName} (€${option.price.toFixed(2)})`}
-                                        size="small"
-                                        color={isSelected ? 'success' : (idx === 0 ? 'default' : 'default')}
-                                        sx={{ fontSize: '0.7rem' }}
-                                      />
-                                    </Box>
-                                  );
-                                })}
-                              </Box>
-                            )
-                          )}
+                  return (
+                    <Card
+                      key={calc.orderId}
+                      sx={{
+                        mb: 2,
+                        bgcolor: isDelivered ? 'grey.200' : (isShipped ? 'grey.100' : 'white'),
+                        opacity: (isShipped || isDelivered) ? 0.85 : 1,
+                      }}
+                    >
+                      <CardContent>
+                        {/* Header with Order Number and Status */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              #{calc.orderNumber}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              ID: {calc.orderId.slice(0, 8)}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            {isShipped && (
+                              <Chip label="Gesendet" size="small" color="primary" sx={{ fontSize: '0.65rem' }} />
+                            )}
+                            {isDelivered && (
+                              <Chip label="Geliefert" size="small" color="success" sx={{ fontSize: '0.65rem' }} />
+                            )}
+                          </Box>
                         </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={`${Number(calc.profit || 0) >= 0 ? '+' : ''}€${Number(calc.profit || 0).toFixed(2)}`}
-                          color={Number(calc.profit || 0) > 0 ? 'success' : 'error'}
-                          size="small"
-                          sx={{ fontWeight: 700 }}
-                        />
-                      </TableCell>
+
+                        <Divider sx={{ my: 2 }} />
+
+                        {/* Details Grid */}
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Gewicht</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                              {Number(calc.totalWeight || 0).toFixed(2)} kg
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Einkauf</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                              €{Number(calc.purchaseCost || 0).toFixed(2)}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Verkauf</Typography>
+                            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600, mt: 0.5 }}>
+                              €{Number(calc.revenue || 0).toFixed(2)}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">Gewinn</Typography>
+                            <Box sx={{ mt: 0.5 }}>
+                              <Chip
+                                label={`${Number(calc.profit || 0) >= 0 ? '+' : ''}€${Number(calc.profit || 0).toFixed(2)}`}
+                                color={Number(calc.profit || 0) > 0 ? 'success' : 'error'}
+                                size="small"
+                                sx={{ fontWeight: 700 }}
+                              />
+                            </Box>
+                          </Grid>
+                        </Grid>
+
+                        <Divider sx={{ my: 2 }} />
+
+                        {/* Shipping Section */}
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                          Versand
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                          €{Number(calc.shippingCost || 0).toFixed(2)}
+                        </Typography>
+
+                        {(isShipped || isDelivered) && order?.selected_shipping_carrier ? (
+                          <Chip
+                            icon={<RadioCheckedIcon />}
+                            label={`${order.selected_shipping_carrier} (€${Number(order.selected_shipping_price || 0).toFixed(2)})`}
+                            size="small"
+                            color="success"
+                            sx={{ fontSize: '0.7rem', fontWeight: 600 }}
+                          />
+                        ) : (
+                          calc.bestShipping.length > 0 && (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                              {calc.bestShipping.map((option, idx) => {
+                                const isSelected = order?.selected_shipping_carrier === option.carrier &&
+                                                   order?.selected_shipping_price === option.price;
+
+                                return (
+                                  <Box
+                                    key={idx}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 1,
+                                      cursor: 'pointer',
+                                      p: 1,
+                                      borderRadius: 1,
+                                      border: '1px solid',
+                                      borderColor: isSelected ? 'success.main' : 'divider',
+                                      bgcolor: isSelected ? 'success.50' : 'transparent',
+                                      '&:hover': {
+                                        bgcolor: isSelected ? 'success.100' : 'grey.50',
+                                      }
+                                    }}
+                                    onClick={() => handleSelectShipping(calc.orderId, option)}
+                                  >
+                                    {isSelected ? (
+                                      <RadioCheckedIcon sx={{ fontSize: 20, color: 'success.main' }} />
+                                    ) : (
+                                      <RadioUncheckedIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                                    )}
+                                    <Box sx={{ flex: 1 }}>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        {option.carrier} - {option.packageName}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        €{option.price.toFixed(2)}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                );
+                              })}
+                            </Box>
+                          )
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Box>
+            ) : (
+              // DESKTOP: Table View
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>Bestellung</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Gewicht</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Einkauf</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Verkauf</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Versand</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Gewinn</TableCell>
                     </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {calculations.map((calc) => {
+                      const order = orders.find(o => o.id === calc.orderId);
+                      const isShipped = order?.status === 'shipped';
+                      const isDelivered = order?.status === 'delivered';
+
+                      return (
+                        <TableRow
+                          key={calc.orderId}
+                          hover
+                          sx={{
+                            bgcolor: isDelivered ? 'grey.200' : (isShipped ? 'grey.100' : 'transparent'),
+                            opacity: (isShipped || isDelivered) ? 0.75 : 1,
+                          }}
+                        >
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              #{calc.orderNumber}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              ID: {calc.orderId.slice(0, 8)}
+                            </Typography>
+                            {isShipped && (
+                              <Chip
+                                label="Gesendet"
+                                size="small"
+                                color="primary"
+                                sx={{ mt: 0.5, fontSize: '0.65rem' }}
+                              />
+                            )}
+                            {isDelivered && (
+                              <Chip
+                                label="Geliefert"
+                                size="small"
+                                color="success"
+                                sx={{ mt: 0.5, fontSize: '0.65rem' }}
+                              />
+                            )}
+                          </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {Number(calc.totalWeight || 0).toFixed(2)} kg
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            €{Number(calc.purchaseCost || 0).toFixed(2)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
+                            €{Number(calc.revenue || 0).toFixed(2)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                              €{Number(calc.shippingCost || 0).toFixed(2)}
+                            </Typography>
+
+                            {/* If shipped or delivered - show only selected shipping (locked) */}
+                            {(isShipped || isDelivered) && order?.selected_shipping_carrier ? (
+                              <Chip
+                                icon={<RadioCheckedIcon />}
+                                label={`${order.selected_shipping_carrier} (€${Number(order.selected_shipping_price || 0).toFixed(2)})`}
+                                size="small"
+                                color="success"
+                                sx={{ fontSize: '0.7rem', fontWeight: 600 }}
+                              />
+                            ) : (
+                              /* Not shipped/delivered - show options to select */
+                              calc.bestShipping.length > 0 && (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                  {calc.bestShipping.map((option, idx) => {
+                                    const isSelected = order?.selected_shipping_carrier === option.carrier &&
+                                                       order?.selected_shipping_price === option.price;
+
+                                    return (
+                                      <Box
+                                        key={idx}
+                                        sx={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 0.5,
+                                          cursor: 'pointer',
+                                          '&:hover': {
+                                            opacity: 0.8,
+                                          }
+                                        }}
+                                        onClick={() => handleSelectShipping(calc.orderId, option)}
+                                      >
+                                        {isSelected ? (
+                                          <RadioCheckedIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                                        ) : (
+                                          <RadioUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                        )}
+                                        <Chip
+                                          label={`${option.carrier} - ${option.packageName} (€${option.price.toFixed(2)})`}
+                                          size="small"
+                                          color={isSelected ? 'success' : (idx === 0 ? 'default' : 'default')}
+                                          sx={{ fontSize: '0.7rem' }}
+                                        />
+                                      </Box>
+                                    );
+                                  })}
+                                </Box>
+                              )
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={`${Number(calc.profit || 0) >= 0 ? '+' : ''}€${Number(calc.profit || 0).toFixed(2)}`}
+                            color={Number(calc.profit || 0) > 0 ? 'success' : 'error'}
+                            size="small"
+                            sx={{ fontWeight: 700 }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
 
             {calculations.length === 0 && (
               <Alert severity="info" sx={{ mt: 2 }}>

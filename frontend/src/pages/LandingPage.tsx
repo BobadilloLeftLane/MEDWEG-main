@@ -1,8 +1,9 @@
-import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Paper, Avatar } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Paper, Avatar, CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import LandingHeader from '../components/LandingHeader';
 import LandingFooter from '../components/LandingFooter';
+import * as contactApi from '../api/contactApi';
 import GlovesIcon from '../assets/icons/GlovesIcon';
 import DisinfectantIcon from '../assets/icons/DisinfectantIcon';
 import WipesIcon from '../assets/icons/WipesIcon';
@@ -29,6 +30,7 @@ const LandingPage = () => {
     telefon: '',
     nachricht: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -37,11 +39,33 @@ const LandingPage = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement contact form API call
-    toast.success('Vielen Dank! Wir werden uns bald bei Ihnen melden.');
-    setFormData({ name: '', email: '', telefon: '', nachricht: '' });
+
+    // Validation
+    if (!formData.name || !formData.email || !formData.telefon || !formData.nachricht) {
+      toast.error('Bitte füllen Sie alle Felder aus');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Submit contact form
+      await contactApi.submitContactForm({
+        name: formData.name,
+        email: formData.email,
+        subject: `Kontakt: ${formData.telefon}`, // Use telefon as subject or combine
+        message: formData.nachricht,
+      });
+
+      toast.success('Vielen Dank! Ihre Nachricht wurde gesendet. Sie erhalten eine Bestätigungsmail.');
+      setFormData({ name: '', email: '', telefon: '', nachricht: '' });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Fehler beim Senden der Nachricht');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const userJourneySteps = [
@@ -78,6 +102,8 @@ const LandingPage = () => {
         flexDirection: 'column',
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #FFFFFF 0%, #E0F2F1 25%, #B2DFDB 50%, #E0F2F1 75%, #FFFFFF 100%)',
+        overflowX: 'hidden',
+        width: '100%',
       }}
     >
       <LandingHeader />
@@ -89,9 +115,9 @@ const LandingPage = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          minHeight: { xs: '700px', md: '850px' },
+          minHeight: { xs: '550px', sm: '650px', md: '850px' },
           color: 'white',
-          py: { xs: 15, md: 20 },
+          py: { xs: 12, sm: 15, md: 20 },
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
@@ -111,13 +137,13 @@ const LandingPage = () => {
           },
         }}
       >
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Box sx={{ mb: 4 }}>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, px: { xs: 2, sm: 3 } }}>
+          <Box sx={{ mb: { xs: 3, md: 4 } }}>
             <Typography
               variant="h1"
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: '5rem', sm: '7rem', md: '9rem' },
+                fontSize: { xs: '3.5rem', sm: '5rem', md: '7rem', lg: '9rem' },
                 color: 'white',
                 textShadow: `
                   0 0 25px rgba(255, 255, 255, 0.9),
@@ -137,7 +163,7 @@ const LandingPage = () => {
               variant="h3"
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: '1.8rem', sm: '2.2rem', md: '3rem' },
+                fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.2rem', lg: '3rem' },
                 color: '#E3F2FD',
                 textShadow: `
                   0 0 15px rgba(255, 255, 255, 0.6),
@@ -156,7 +182,7 @@ const LandingPage = () => {
             sx={{
               fontWeight: 400,
               lineHeight: 1.6,
-              fontSize: { xs: '1.1rem', md: '1.5rem' },
+              fontSize: { xs: '0.95rem', sm: '1.1rem', md: '1.3rem', lg: '1.5rem' },
               color: 'white',
               textShadow: `
                 0 0 10px rgba(0, 0, 0, 0.8),
@@ -164,6 +190,7 @@ const LandingPage = () => {
               `,
               maxWidth: '700px',
               mx: 'auto',
+              px: { xs: 2, sm: 0 },
             }}
           >
             Ihr zuverlässiger Partner für hochwertige medizinische Versorgung in ganz Deutschland
@@ -174,14 +201,14 @@ const LandingPage = () => {
       {/* Warehouse Image Section - Seamless transition */}
       <Box
         sx={{
-          minHeight: '1400px',
+          minHeight: { xs: 'auto', md: '1400px' },
           backgroundImage: 'url(/warum-medweg-bg.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           position: 'relative',
-          marginTop: '-100px',
-          paddingTop: '100px',
+          marginTop: { xs: '-50px', md: '-100px' },
+          paddingTop: { xs: '50px', md: '100px' },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -201,37 +228,37 @@ const LandingPage = () => {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '200px',
+            height: { xs: '100px', md: '200px' },
             background: 'linear-gradient(to top, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 50%, transparent 100%)',
             zIndex: 1,
           },
         }}
       >
         {/* Main Content */}
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, py: 8 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, py: { xs: 4, md: 8 }, px: { xs: 2, sm: 3 } }}>
 
         {/* 1. Warum MEDWEG Section - ERSTE SEKCIJA */}
         <Box
           id="warum-medweg"
           sx={{
-            mb: 12,
-            mt: -45,
+            mb: { xs: 6, md: 12 },
+            mt: { xs: -20, sm: -30, md: -45 },
             bgcolor: 'white',
-            py: 8,
-            px: 5,
+            py: { xs: 4, sm: 6, md: 8 },
+            px: { xs: 2, sm: 3, md: 5 },
             borderRadius: 4,
             boxShadow: 6,
           }}
         >
           <Typography
             variant="h3"
-            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main' }}
+            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
             Warum MEDWEG wählen?
           </Typography>
           <Typography
             variant="body1"
-            sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: '1.1rem', maxWidth: '800px', mx: 'auto' }}
+            sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.1rem' }, maxWidth: '800px', mx: 'auto', px: { xs: 1, sm: 0 } }}
           >
             Modernste Technologie trifft auf jahrelange Erfahrung in der Pflegebranche
           </Typography>
@@ -388,16 +415,16 @@ const LandingPage = () => {
         <Container maxWidth="lg" sx={{ flexGrow: 1, position: 'relative', zIndex: 2 }}>
 
           {/* 2. User Journey Section - DRUGA SEKCIJA */}
-          <Box id="wie-funktioniert" sx={{ mb: 12, bgcolor: 'white', py: 8, px: 4, borderRadius: 4 }}>
+          <Box id="wie-funktioniert" sx={{ mb: { xs: 6, md: 12 }, bgcolor: 'white', py: { xs: 4, sm: 6, md: 8 }, px: { xs: 2, sm: 3, md: 4 }, borderRadius: 4 }}>
           <Typography
             variant="h3"
-            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main' }}
+            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
             Wie funktioniert es?
           </Typography>
           <Typography
             variant="body1"
-            sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: '1.1rem' }}
+            sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.1rem' }, px: { xs: 1, sm: 0 } }}
           >
             Einfach, schnell und benutzerfreundlich – So nutzen Sie unsere Plattform
           </Typography>
@@ -599,14 +626,14 @@ const LandingPage = () => {
       {/* Über uns Background Section */}
       <Box
         sx={{
-          minHeight: '1800px',
+          minHeight: { xs: 'auto', md: '1800px' },
           backgroundImage: 'url(/uber-uns-bg.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           position: 'relative',
-          marginTop: '-100px',
-          paddingTop: '100px',
+          marginTop: { xs: '-50px', md: '-100px' },
+          paddingTop: { xs: '50px', md: '100px' },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -626,40 +653,40 @@ const LandingPage = () => {
             bottom: 0,
             left: 0,
             right: 0,
-            height: '250px',
+            height: { xs: '150px', md: '250px' },
             background: 'linear-gradient(to top, #008c80 0%, rgba(0, 140, 128, 0.95) 25%, rgba(0, 140, 128, 0.8) 50%, rgba(0, 140, 128, 0.5) 75%, transparent 100%)',
             zIndex: 2,
           },
         }}
       >
         {/* Continue with rest of content */}
-        <Container maxWidth="lg" sx={{ py: 8, flexGrow: 1, position: 'relative', zIndex: 3 }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 }, flexGrow: 1, position: 'relative', zIndex: 3, px: { xs: 2, sm: 3 } }}>
 
           {/* 3. Über uns Section - TREĆA SEKCIJA */}
-          <Box id="ueber-uns" sx={{ mb: 12 }}>
+          <Box id="ueber-uns" sx={{ mb: { xs: 6, md: 12 } }}>
           <Typography
             variant="h3"
-            sx={{ fontWeight: 700, mb: 4, textAlign: 'center', color: 'white' }}
+            sx={{ fontWeight: 700, mb: { xs: 3, md: 4 }, textAlign: 'center', color: 'white', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
             Über uns
           </Typography>
           <Typography
             variant="body1"
-            sx={{ fontSize: '1.15rem', lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: 4, color: 'white' }}
+            sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: { xs: 3, md: 4 }, color: 'white', px: { xs: 1, sm: 0 } }}
           >
             <strong>MEDWEG</strong> ist Ihr zuverlässiger Partner für medizinische Versorgung mit Sitz in <strong>Augsburg, Deutschland</strong>.
             Wir spezialisieren uns auf den Vertrieb hochwertiger medizinischer Produkte für <strong>Unternehmen</strong> und <strong>Privatpersonen</strong>.
           </Typography>
           <Typography
             variant="body1"
-            sx={{ fontSize: '1.15rem', lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: 6, color: 'white' }}
+            sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: { xs: 4, md: 6 }, color: 'white', px: { xs: 1, sm: 0 } }}
           >
             Unser Sortiment umfasst Einweghandschuhe, Desinfektionsmittel und Desinfektionstücher – alles,
             was Sie für eine sichere und hygienische Arbeitsumgebung benötigen.
           </Typography>
 
           {/* Products Grid */}
-          <Grid container spacing={4} sx={{ mt: 2, mb: 8 }}>
+          <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mt: { xs: 1, md: 2 }, mb: { xs: 4, md: 8 } }}>
             <Grid item xs={12} md={4}>
               <Card
                 sx={{
@@ -788,20 +815,20 @@ const LandingPage = () => {
           </Grid>
 
           {/* Über den Geschäftsführer - PODNASLOV */}
-          <Box sx={{ mt: 8 }}>
+          <Box sx={{ mt: { xs: 4, md: 8 } }}>
             <Typography
               variant="h4"
-              sx={{ fontWeight: 700, mb: 5, textAlign: 'center', color: 'white' }}
+              sx={{ fontWeight: 700, mb: { xs: 3, md: 5 }, textAlign: 'center', color: 'white', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}
             >
               Über den Geschäftsführer
             </Typography>
-            <Paper elevation={6} sx={{ p: 5, borderRadius: 4, background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)' }}>
-              <Grid container spacing={4} alignItems="center">
+            <Paper elevation={6} sx={{ p: { xs: 3, sm: 4, md: 5 }, borderRadius: 4, background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)' }}>
+              <Grid container spacing={{ xs: 3, md: 4 }} alignItems="center">
                 <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
                   <Box
                     sx={{
-                      width: 280,
-                      height: 350,
+                      width: { xs: 200, sm: 240, md: 280 },
+                      height: { xs: 250, sm: 300, md: 350 },
                       mx: 'auto',
                       mb: 2,
                       boxShadow: 6,
@@ -883,7 +910,7 @@ const LandingPage = () => {
       <Box
         sx={{
           bgcolor: 'white',
-          py: 10,
+          py: { xs: 6, md: 10 },
           position: 'relative',
           '&::before': {
             content: '""',
@@ -891,16 +918,16 @@ const LandingPage = () => {
             top: 0,
             left: 0,
             right: 0,
-            height: '100px',
+            height: { xs: '60px', md: '100px' },
             background: 'linear-gradient(to bottom, #008c80 0%, rgba(0, 140, 128, 0.9) 15%, rgba(0, 140, 128, 0.75) 30%, rgba(0, 140, 128, 0.55) 50%, rgba(255, 255, 255, 0.3) 75%, transparent 100%)',
             zIndex: 1,
           },
         }}
       >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, px: { xs: 2, sm: 3 } }}>
           <Typography
             variant="h3"
-            sx={{ fontWeight: 700, mb: 6, mt: 8, textAlign: 'center', color: 'primary.main' }}
+            sx={{ fontWeight: 700, mb: { xs: 4, md: 6 }, mt: { xs: 4, md: 8 }, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
             Unsere Partner
           </Typography>
@@ -909,34 +936,47 @@ const LandingPage = () => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              flexWrap: 'nowrap',
-              gap: 6,
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              gap: { xs: 2, sm: 3, md: 4 },
             }}
           >
             <Box
               component="img"
-              src="/q.png"
+              src="/partner1.png"
               alt="Partner 1"
               sx={{
-                height: 80,
+                height: { xs: 50, sm: 65, md: 80 },
+                maxWidth: { xs: '150px', sm: '190px', md: '230px' },
+                objectFit: 'contain',
+              }}
+            />
+            <Box
+              component="img"
+              src="/q.png"
+              alt="Partner 2"
+              sx={{
+                height: { xs: 45, sm: 58, md: 72 },
+                maxWidth: { xs: '130px', sm: '165px', md: '200px' },
                 objectFit: 'contain',
               }}
             />
             <Box
               component="img"
               src="/qq.png"
-              alt="Partner 2"
+              alt="Partner 3"
               sx={{
-                height: 150,
+                height: { xs: 65, sm: 90, md: 115 },
+                maxWidth: { xs: '165px', sm: '215px', md: '265px' },
                 objectFit: 'contain',
               }}
             />
             <Box
               component="img"
               src="/qqq.webp"
-              alt="Partner 3"
+              alt="Partner 4"
               sx={{
-                height: 200,
+                height: { xs: 75, sm: 110, md: 140 },
+                maxWidth: { xs: '180px', sm: '240px', md: '300px' },
                 objectFit: 'contain',
               }}
             />
@@ -948,27 +988,27 @@ const LandingPage = () => {
       <Box
         sx={{
           bgcolor: 'white',
-          py: 8,
+          py: { xs: 6, md: 8 },
         }}
       >
-        <Container maxWidth="lg" sx={{ flexGrow: 1, position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ flexGrow: 1, position: 'relative', zIndex: 2, px: { xs: 2, sm: 3 } }}>
 
           {/* 4. Kontakt Section - ČETVRTA SEKCIJA */}
-          <Box id="kontakt" sx={{ mb: 10 }}>
+          <Box id="kontakt" sx={{ mb: { xs: 6, md: 10 } }}>
           <Typography
             variant="h3"
-            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main' }}
+            sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
             Kontaktieren Sie uns
           </Typography>
           <Typography
             variant="body1"
-            sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: '1.15rem' }}
+            sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, px: { xs: 1, sm: 0 } }}
           >
             Haben Sie Fragen oder möchten Sie ein Angebot erhalten? Schreiben Sie uns!
           </Typography>
 
-          <Paper elevation={8} sx={{ maxWidth: '800px', mx: 'auto', p: 5, borderRadius: 4, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
+          <Paper elevation={8} sx={{ maxWidth: '800px', mx: 'auto', p: { xs: 3, sm: 4, md: 5 }, borderRadius: 4, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -1023,6 +1063,7 @@ const LandingPage = () => {
                     variant="contained"
                     size="large"
                     fullWidth
+                    disabled={isSubmitting}
                     sx={{
                       py: 2,
                       fontWeight: 700,
@@ -1032,10 +1073,21 @@ const LandingPage = () => {
                         transform: 'translateY(-2px)',
                         boxShadow: 8,
                       },
+                      '&:disabled': {
+                        background: '#80CBC4',
+                        color: 'white',
+                      },
                       transition: 'all 0.3s'
                     }}
                   >
-                    Nachricht senden
+                    {isSubmitting ? (
+                      <>
+                        <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                        Wird gesendet...
+                      </>
+                    ) : (
+                      'Nachricht senden'
+                    )}
                   </Button>
                 </Grid>
               </Grid>
@@ -1045,104 +1097,186 @@ const LandingPage = () => {
         </Container>
       </Box>
 
-      {/* 5. Location Section with Google Maps as Background - POSLEDNJA SEKCIJA */}
+      {/* 5. Location Section - POSLEDNJA SEKCIJA */}
       <Box
         id="standort"
         sx={{
           position: 'relative',
-          minHeight: '100vh',
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
-          overflow: 'hidden',
+          width: '100%',
+          left: 0,
+          right: 0,
         }}
       >
-        {/* Google Maps Background */}
+        {/* DESKTOP VERSION: Map as background */}
         <Box
           sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 0,
+            display: { xs: 'none', md: 'block' },
+            position: 'relative',
+            minHeight: '100vh',
+            overflow: 'hidden',
           }}
         >
-          <iframe
-            title="MEDWEG Standort Augsburg"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d42647.36896864454!2d10.868687749999999!3d48.3705437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479ea1d4e5fb7c15%3A0x41d8a1f0c1c0720!2sAugsburg%2C%20Deutschland!5e0!3m2!1sde!2sde!4v1234567890"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </Box>
-
-        {/* Semi-transparent overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.2)',
-            zIndex: 1,
-          }}
-        />
-
-        {/* Info Box - Top Right */}
-        <Paper
-          elevation={10}
-          sx={{
-            position: 'absolute',
-            top: 40,
-            right: 40,
-            zIndex: 2,
-            p: 4,
-            maxWidth: '450px',
-            bgcolor: 'white',
-            borderRadius: 3,
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}
+          {/* Google Maps Background */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 0,
+            }}
           >
-            Unser Standort
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-            <LocationOnIcon sx={{ fontSize: 45, color: 'error.main' }} />
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                MEDWEG
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Augsburg, Deutschland
+            <iframe
+              title="MEDWEG Standort Augsburg"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d42647.36896864454!2d10.868687749999999!3d48.3705437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479ea1d4e5fb7c15%3A0x41d8a1f0c1c0720!2sAugsburg%2C%20Deutschland!5e0!3m2!1sde!2sde!4v1234567890"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </Box>
+
+          {/* Semi-transparent overlay */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.2)',
+              zIndex: 1,
+            }}
+          />
+
+          {/* Info Box - Desktop */}
+          <Paper
+            elevation={10}
+            sx={{
+              position: 'absolute',
+              top: 40,
+              right: 40,
+              zIndex: 2,
+              p: 4,
+              maxWidth: '450px',
+              bgcolor: 'white',
+              borderRadius: 3,
+            }}
+          >
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
+              Unser Standort
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <LocationOnIcon sx={{ fontSize: 45, color: 'error.main' }} />
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                  MEDWEG
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Augsburg, Deutschland
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
+              <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
+                <strong>Stadt:</strong> Augsburg, Bayern<br />
+                <strong>E-Mail:</strong> info@medweg.de<br />
+                <strong>Telefon:</strong> +49 821 1234 5678<br />
+                <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
               </Typography>
             </Box>
-          </Box>
-          <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
-            <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
-              <strong>Stadt:</strong> Augsburg, Bayern<br />
-              <strong>E-Mail:</strong> info@medweg.de<br />
-              <strong>Telefon:</strong> +49 821 1234 5678<br />
-              <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
-            </Typography>
-          </Box>
-        </Paper>
+          </Paper>
 
-        {/* Footer over map */}
+          {/* Footer over map */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 3,
+            }}
+          >
+            <LandingFooter />
+          </Box>
+        </Box>
+
+        {/* MOBILE VERSION: Stacked layout */}
         <Box
           sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 3,
+            display: { xs: 'block', md: 'none' },
+            bgcolor: 'white',
+            pb: 0,
           }}
         >
+          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 4 }}>
+            {/* Info Section */}
+            <Paper
+              elevation={4}
+              sx={{
+                p: 3,
+                mb: 3,
+                borderRadius: 3,
+              }}
+            >
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
+                Unser Standort
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <LocationOnIcon sx={{ fontSize: 35, color: 'error.main' }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    MEDWEG
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Augsburg, Deutschland
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+                  <strong>Stadt:</strong> Augsburg, Bayern<br />
+                  <strong>E-Mail:</strong> info@medweg.de<br />
+                  <strong>Telefon:</strong> +49 821 1234 5678<br />
+                  <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
+                </Typography>
+              </Box>
+            </Paper>
+
+            {/* Map Section */}
+            <Paper
+              elevation={4}
+              sx={{
+                overflow: 'hidden',
+                borderRadius: 3,
+                mb: 3,
+              }}
+            >
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '400px',
+                  position: 'relative',
+                }}
+              >
+                <iframe
+                  title="MEDWEG Standort Augsburg Mobile"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d42647.36896864454!2d10.868687749999999!3d48.3705437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479ea1d4e5fb7c15%3A0x41d8a1f0c1c0720!2sAugsburg%2C%20Deutschland!5e0!3m2!1sde!2sde!4v1234567890"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </Box>
+            </Paper>
+          </Container>
+
+          {/* Footer */}
           <LandingFooter />
         </Box>
       </Box>

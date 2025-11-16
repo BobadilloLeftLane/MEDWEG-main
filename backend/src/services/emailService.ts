@@ -470,3 +470,221 @@ export const sendOrderReminder = async (
   // TODO: Implement with Gmail SMTP or keep as mock for now
   logger.info('📧 Order reminder', { email, patientsCount: patients.length });
 };
+
+/**
+ * Send Contact Form Notification to Admin
+ * Sends notification to service.medwegbavaria@gmail.com when someone submits contact form
+ */
+export const sendContactFormNotification = async (
+  name: string,
+  email: string,
+  subject: string,
+  message: string
+): Promise<void> => {
+  const adminEmail = 'service.medwegbavaria@gmail.com';
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; }
+        .header { background: linear-gradient(135deg, #009688 0%, #00BCD4 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .logo { max-width: 200px; height: auto; margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info-box { background: white; border-left: 4px solid #009688; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .message-box { background: #e0f2f1; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #009688; }
+        .contact-details { background: #fff9e6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffc107; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <img src="cid:logo" alt="MEDWEG Bavaria Logo" class="logo" />
+          <h1 style="margin: 10px 0 0 0;">📧 Neue Kontaktanfrage</h1>
+          <p style="margin: 5px 0 0 0;">Landing Page Kontaktformular</p>
+        </div>
+
+        <div class="content">
+          <div class="info-box">
+            <h3 style="margin: 0 0 15px 0; color: #009688;">👤 Absenderinformationen:</h3>
+            <div class="contact-details">
+              <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
+              <p style="margin: 8px 0;"><strong>E-Mail:</strong> <a href="mailto:${email}">${email}</a></p>
+              <p style="margin: 8px 0;"><strong>Betreff:</strong> ${subject}</p>
+              <p style="margin: 8px 0;"><strong>Zeitpunkt:</strong> ${new Date().toLocaleString('de-DE', {
+                timeZone: 'Europe/Berlin',
+                dateStyle: 'full',
+                timeStyle: 'short'
+              })}</p>
+            </div>
+          </div>
+
+          <div class="message-box">
+            <h3 style="margin: 0 0 15px 0; color: #009688;">💬 Nachricht:</h3>
+            <p style="white-space: pre-wrap; margin: 0; font-size: 15px; line-height: 1.6;">${message}</p>
+          </div>
+
+          <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 18px; margin: 20px 0; border-radius: 8px;">
+            <p style="margin: 0; color: #1565C0;">
+              <strong>📨 Hinweis:</strong> Eine automatische Bestätigungsmail wurde an ${email} gesendet.
+            </p>
+          </div>
+
+          <p style="font-size: 14px; color: #666;">
+            Bitte antworten Sie zeitnah auf diese Anfrage, um einen professionellen Kundenservice zu gewährleisten.
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>MEDWEG Bavaria - Kontaktsystem</strong></p>
+          <p style="color: #999; font-size: 11px;">
+            Diese E-Mail wurde automatisch vom MEDWEG Landing Page System generiert.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
+    to: adminEmail,
+    replyTo: email, // Allow admin to reply directly to sender
+    subject: `📧 Neue Kontaktanfrage: ${subject}`,
+    html: htmlContent,
+    attachments: [
+      {
+        filename: 'medwegbavaria_logo.jpg',
+        path: 'public/assets/medwegbavaria_logo.jpg',
+        cid: 'logo',
+      },
+    ],
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    logger.info('✅ Contact form notification sent to admin', { name, email, subject });
+  } catch (error) {
+    logger.error('❌ Failed to send contact form notification', { name, email, error });
+    throw error; // Throw error so contact form submission fails if email can't be sent
+  }
+};
+
+/**
+ * Send Contact Form Auto-Reply to Sender
+ * Sends automatic confirmation to person who submitted contact form
+ */
+export const sendContactFormAutoReply = async (
+  name: string,
+  email: string,
+  subject: string
+): Promise<void> => {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; }
+        .header { background: linear-gradient(135deg, #009688 0%, #00BCD4 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .logo { max-width: 250px; height: auto; margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .success-box { background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .info-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #ddd; }
+        .contact-info { background: #e0f2f1; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #ddd; margin-top: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <img src="cid:logo" alt="MEDWEG Bavaria Logo" class="logo" />
+          <h1 style="margin: 10px 0 0 0;">Vielen Dank für Ihre Nachricht!</h1>
+          <p style="margin: 5px 0 0 0; font-size: 16px;">Wir haben Ihre Anfrage erhalten</p>
+        </div>
+
+        <div class="content">
+          <p style="font-size: 16px; margin-top: 0;">Sehr geehrte/r ${name},</p>
+
+          <div class="success-box">
+            <p style="margin: 0; font-size: 15px; color: #2e7d32;">
+              <strong>✓ Ihre Nachricht wurde erfolgreich übermittelt!</strong>
+            </p>
+          </div>
+
+          <p style="font-size: 15px;">
+            Vielen Dank, dass Sie sich mit uns in Verbindung gesetzt haben. Wir haben Ihre Anfrage zum Thema
+            "<strong>${subject}</strong>" erhalten und werden uns <strong>so schnell wie möglich</strong> bei Ihnen melden.
+          </p>
+
+          <div class="info-box">
+            <h3 style="margin: 0 0 15px 0; color: #009688;">⏱️ Was passiert als Nächstes?</h3>
+            <p style="margin: 8px 0; font-size: 14px;">
+              ✓ Unser Team prüft Ihre Anfrage<br>
+              ✓ Sie erhalten in der Regel innerhalb von <strong>24 Stunden</strong> eine Antwort<br>
+              ✓ Bei dringenden Anliegen kontaktieren Sie uns bitte telefonisch
+            </p>
+          </div>
+
+          <div class="contact-info">
+            <h3 style="margin: 0 0 15px 0; color: #009688;">📞 Kontaktinformationen:</h3>
+            <p style="margin: 8px 0; font-size: 14px;">
+              <strong>MEDWEG Bavaria GmbH</strong><br>
+              📍 Augsburg, Deutschland<br>
+              📧 E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688;">service.medwegbavaria@gmail.com</a><br>
+              📞 Telefon: +49 821 1234 5678<br>
+              🕐 Öffnungszeiten: Mo-Fr, 9:00-18:00 Uhr
+            </p>
+          </div>
+
+          <p style="font-size: 14px; color: #666; margin-bottom: 0;">
+            Falls Sie weitere Fragen haben, zögern Sie nicht, uns erneut zu kontaktieren.
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+          <p style="font-size: 15px; text-align: center; color: #009688; font-weight: 600; margin: 20px 0;">
+            Wir freuen uns darauf, mit Ihnen zusammenzuarbeiten!
+          </p>
+        </div>
+
+        <div class="footer">
+          <p style="margin: 5px 0;"><strong>MEDWEG Bavaria</strong></p>
+          <p style="margin: 5px 0;">Ihr zuverlässiger Partner für medizinische Versorgung</p>
+          <p style="color: #999; font-size: 11px; margin-top: 15px;">
+            Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.<br>
+            Bei Fragen kontaktieren Sie uns unter service.medwegbavaria@gmail.com
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
+    to: email,
+    subject: `Bestätigung: Ihre Anfrage bei MEDWEG Bavaria`,
+    html: htmlContent,
+    attachments: [
+      {
+        filename: 'medwegbavaria_logo.jpg',
+        path: 'public/assets/medwegbavaria_logo.jpg',
+        cid: 'logo',
+      },
+    ],
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    logger.info('✅ Contact form auto-reply sent', { name, email });
+  } catch (error) {
+    logger.error('❌ Failed to send contact form auto-reply', { name, email, error });
+    // Don't throw - auto-reply failure shouldn't block the main notification
+  }
+};

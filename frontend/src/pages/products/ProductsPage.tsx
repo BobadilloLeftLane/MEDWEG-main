@@ -23,6 +23,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -51,6 +57,8 @@ import { useAuthStore, UserRole } from '../../store/authStore';
  */
 const ProductsPage = () => {
   const { user } = useAuthStore();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isAdminApp = user?.role === UserRole.ADMIN_APPLICATION;
   const isInstitution = user?.role === UserRole.ADMIN_INSTITUTION;
   const [products, setProducts] = useState<productApi.Product[]>([]);
@@ -206,8 +214,8 @@ const ProductsPage = () => {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: 3, gap: { xs: 2, sm: 0 } }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           {isAdminApp ? 'Produktverwaltung' : 'Verfügbare Produkte'}
         </Typography>
         {isAdminApp && (
@@ -215,6 +223,7 @@ const ProductsPage = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateDialogOpen(true)}
+            fullWidth={{ xs: true, sm: false }}
           >
             Neues Produkt
           </Button>
@@ -224,6 +233,7 @@ const ProductsPage = () => {
             variant="contained"
             startIcon={<ShoppingCartIcon />}
             onClick={() => setCreateOrderDialogOpen(true)}
+            fullWidth={{ xs: true, sm: false }}
             sx={{
               background: 'linear-gradient(135deg, #10B981 0%, #2563EB 100%)',
               '&:hover': {
@@ -237,8 +247,8 @@ const ProductsPage = () => {
       </Box>
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Paper sx={{ p: { xs: 1.5, sm: 2 }, mb: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
           <TextField
             placeholder="Suche nach Name oder Beschreibung..."
             value={searchQuery}
@@ -259,7 +269,8 @@ const ProductsPage = () => {
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             size="small"
-            sx={{ minWidth: 200 }}
+            fullWidth={{ xs: true, sm: false }}
+            sx={{ minWidth: { sm: 200 } }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -276,7 +287,7 @@ const ProductsPage = () => {
         </Box>
       </Paper>
 
-      {/* Products Table */}
+      {/* Products - Mobile Cards / Desktop Table */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -285,7 +296,125 @@ const ProductsPage = () => {
         <Alert severity="info">
           Keine Produkte gefunden. Erstellen Sie ein neues Produkt.
         </Alert>
+      ) : isMobile ? (
+        // MOBILE: Card View
+        <Box>
+          {products.map((product) => (
+            <Card key={product.id} sx={{ mb: 2 }}>
+              <CardContent>
+                {/* Product Image and Title */}
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                  <Box
+                    component="img"
+                    src={getProductImageUrl(product.type, product.image_url)}
+                    alt={product.name_de}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      objectFit: 'contain',
+                      borderRadius: 1,
+                      bgcolor: 'grey.100',
+                      p: 0.5,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      {product.name_de}
+                    </Typography>
+                    {product.description_de && (
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        {product.description_de.substring(0, 80)}
+                        {product.description_de.length > 80 ? '...' : ''}
+                      </Typography>
+                    )}
+                    <Chip
+                      label={product.is_available ? 'Verfügbar' : 'Nicht verfügbar'}
+                      color={product.is_available ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </Box>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Product Details */}
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary">
+                      Typ & Größe
+                    </Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      {getProductIcon(product)}
+                    </Box>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary">
+                      Menge/Box
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                      {product.quantity_per_box} {product.unit}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary">
+                      Preis/Einheit
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                      €{Number(product.price_per_unit).toFixed(2)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="caption" color="text.secondary">
+                      Min. Bestellung
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5 }}>
+                      {product.min_order_quantity}
+                    </Typography>
+                  </Grid>
+                </Grid>
+
+                {/* Admin Actions */}
+                {isAdminApp && (
+                  <>
+                    <Divider sx={{ my: 2 }} />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setEditDialogOpen(true);
+                        }}
+                      >
+                        Bearbeiten
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant={product.is_available ? 'outlined' : 'contained'}
+                        onClick={() => handleToggleAvailability(product)}
+                      >
+                        {product.is_available ? 'Deaktivieren' : 'Aktivieren'}
+                      </Button>
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
       ) : (
+        // DESKTOP: Table View
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
