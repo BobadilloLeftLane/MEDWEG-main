@@ -47,7 +47,9 @@ export const resendCode = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({
     success: true,
-    message: result.message,
+    data: {
+      message: result.message,
+    },
   });
 });
 
@@ -59,7 +61,21 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const data: LoginDto = req.body;
   const result = await authService.login(data);
 
-  // Set HTTP-Only cookies
+  // Check if email verification is required
+  if (result.requiresEmailVerification) {
+    // Don't set cookies, just return verification needed response
+    res.status(200).json({
+      success: true,
+      message: result.message || 'E-Mail-Verifizierung erforderlich',
+      data: {
+        requiresEmailVerification: true,
+        email: result.email,
+      },
+    });
+    return;
+  }
+
+  // Set HTTP-Only cookies ONLY if login is successful and verified
   res.cookie('accessToken', result.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -79,8 +95,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     message: 'Anmeldung erfolgreich',
     data: {
       user: result.user,
-      accessToken: result.accessToken, // Pošalji i u response-u (za mobile)
-      refreshToken: result.refreshToken,
+      // SECURITY: Tokens are NOT sent in response body (XSS vulnerability)
+      // Tokens are in HTTP-Only cookies only
     },
   });
 });
@@ -168,8 +184,8 @@ export const workerLogin = asyncHandler(async (req: Request, res: Response) => {
     message: 'Anmeldung erfolgreich',
     data: {
       user: result.user,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      // SECURITY: Tokens are NOT sent in response body (XSS vulnerability)
+      // Tokens are in HTTP-Only cookies only
     },
   });
 });

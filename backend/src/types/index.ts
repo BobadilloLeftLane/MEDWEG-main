@@ -239,9 +239,12 @@ export interface ResetPasswordDto {
 }
 
 export interface LoginResponse {
-  user: UserResponse;
-  accessToken: string;
-  refreshToken: string;
+  user?: UserResponse;
+  accessToken?: string;
+  refreshToken?: string;
+  requiresEmailVerification?: boolean;
+  email?: string;
+  message?: string;
 }
 
 /**

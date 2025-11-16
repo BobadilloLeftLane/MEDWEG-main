@@ -59,6 +59,12 @@ app.use(cookieParser());
 app.use(compression());
 
 /**
+ * Static Files Middleware
+ * Serve public assets (logos, images) for email embedding
+ */
+app.use('/assets', express.static('public/assets'));
+
+/**
  * Request Logging Middleware (Development)
  */
 if (process.env.NODE_ENV === 'development') {

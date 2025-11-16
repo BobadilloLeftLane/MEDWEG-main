@@ -20,7 +20,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { useAuthStore, UserRole } from '../../store/authStore';
-import { login, workerLogin } from '../../api/authApi';
+import { login, workerLogin, verifyEmail, resendVerificationCode } from '../../api/authApi';
+import VerificationModal from '../../components/auth/VerificationModal';
 
 /**
  * Login Form Validation Schemas
@@ -60,6 +61,9 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const [savedPassword, setSavedPassword] = useState(''); // Store password for re-login after verification
 
   // Get the page user was trying to access before being redirected to login
   const from = (location.state as any)?.from?.pathname || null;
@@ -90,6 +94,36 @@ const LoginPage = () => {
     setErrorMessage('');
   }, [loginType, reset]);
 
+  const handleVerifyEmail = async (code: string) => {
+    // 1. Verify email with code
+    await verifyEmail({ email: verificationEmail, code });
+
+    // 2. After successful verification, automatically login
+    if (loginType === 'admin') {
+      const response = await login({ email: verificationEmail, password: savedPassword });
+
+      if (response.user) {
+        setAuth(response.user);
+        setShowVerificationModal(false);
+        toast.success('Email verifiziert! Erfolgreich angemeldet!');
+
+        // Navigate to appropriate dashboard
+        let destination = '/institution/dashboard';
+        if (response.user.role === UserRole.ADMIN_APPLICATION) {
+          destination = '/admin/dashboard';
+        } else if (response.user.role === UserRole.WORKER) {
+          destination = '/worker/dashboard';
+        }
+
+        navigate(destination, { replace: true });
+      }
+    }
+  };
+
+  const handleResendCode = async () => {
+    await resendVerificationCode({ email: verificationEmail });
+  };
+
   const onSubmit = async (data: AdminLoginFormData | WorkerLoginFormData) => {
     setIsLoading(true);
     setErrorMessage('');
@@ -100,10 +134,19 @@ const LoginPage = () => {
       if (loginType === 'admin') {
         const adminData = data as AdminLoginFormData;
         console.log('Admin login attempt:', adminData.email);
+
+        // Save password for re-login after verification
+        setSavedPassword(adminData.password);
+
         response = await login({
           email: adminData.email,
           password: adminData.password,
         });
+
+        console.log('🔍 Full login response:', response);
+        console.log('🔍 requiresEmailVerification:', response.requiresEmailVerification);
+        console.log('🔍 email:', response.email);
+        console.log('🔍 user:', response.user);
       } else {
         const workerData = data as WorkerLoginFormData;
         console.log('Worker login attempt:', workerData.username);
@@ -113,37 +156,45 @@ const LoginPage = () => {
         });
       }
 
-      console.log('Login successful:', response.user);
-
-      // Set auth state with real tokens
-      setAuth(
-        response.user,
-        response.accessToken,
-        response.refreshToken
-      );
-
-      toast.success('Erfolgreich angemeldet!');
-
-      // Navigate to the page user was trying to access, or to their default dashboard
-      let destination: string;
-
-      if (from) {
-        // User was trying to access a specific page before being redirected to login
-        destination = from;
-      } else {
-        // Default navigation based on role
-        if (response.user.role === UserRole.ADMIN_APPLICATION) {
-          destination = '/admin/dashboard';
-        } else if (response.user.role === UserRole.ADMIN_INSTITUTION) {
-          destination = '/institution/dashboard';
-        } else if (response.user.role === UserRole.WORKER) {
-          destination = '/worker/dashboard';
-        } else {
-          destination = '/dashboard';
-        }
+      // Check if email verification is required
+      if (response.requiresEmailVerification && response.email) {
+        console.log('Email verification required for:', response.email);
+        setVerificationEmail(response.email);
+        setShowVerificationModal(true);
+        setIsLoading(false); // Stop loading since we're showing modal
+        return; // ВАЖНО: Ne pokazuj success toast, samo prikaži modal!
       }
 
-      navigate(destination, { replace: true });
+      console.log('Login successful:', response.user);
+
+      // Set auth state (tokens are in HTTP-Only cookies)
+      if (response.user) {
+        setAuth(response.user);
+        toast.success('Erfolgreich angemeldet!');
+      }
+
+      // Navigate to the page user was trying to access, or to their default dashboard
+      if (response.user) {
+        let destination: string;
+
+        if (from) {
+          // User was trying to access a specific page before being redirected to login
+          destination = from;
+        } else {
+          // Default navigation based on role
+          if (response.user.role === UserRole.ADMIN_APPLICATION) {
+            destination = '/admin/dashboard';
+          } else if (response.user.role === UserRole.ADMIN_INSTITUTION) {
+            destination = '/institution/dashboard';
+          } else if (response.user.role === UserRole.WORKER) {
+            destination = '/worker/dashboard';
+          } else {
+            destination = '/dashboard';
+          }
+        }
+
+        navigate(destination, { replace: true });
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       const message = error?.response?.data?.error || error?.message || 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.';
@@ -271,8 +322,8 @@ const LoginPage = () => {
                 type="email"
                 fullWidth
                 margin="normal"
-                error={!!errors.email}
-                helperText={errors.email?.message}
+                error={!!(errors as any).email}
+                helperText={(errors as any).email?.message}
                 autoComplete="email"
                 autoFocus
                 sx={{ mb: 2 }}
@@ -284,8 +335,8 @@ const LoginPage = () => {
                 type="text"
                 fullWidth
                 margin="normal"
-                error={!!errors.username}
-                helperText={errors.username?.message}
+                error={!!(errors as any).username}
+                helperText={(errors as any).username?.message}
                 autoComplete="username"
                 autoFocus
                 sx={{ mb: 2 }}
@@ -373,6 +424,15 @@ const LoginPage = () => {
           © 2024 MEDWEG - Medizinischer Großhandel
         </Typography>
       </Container>
+
+      {/* Email Verification Modal */}
+      <VerificationModal
+        open={showVerificationModal}
+        email={verificationEmail}
+        onVerify={handleVerifyEmail}
+        onResend={handleResendCode}
+        onClose={() => setShowVerificationModal(false)}
+      />
     </Box>
   );
 };

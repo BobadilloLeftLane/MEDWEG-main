@@ -14,19 +14,20 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+  withCredentials: true, // CRITICAL: Enable HTTP-Only cookie transmission
 });
 
 /**
- * Request interceptor - Add auth token to requests
+ * Request interceptor
+ *
+ * SECURITY NOTE: Tokens are automatically sent via HTTP-Only cookies.
+ * No need to manually attach Authorization header.
+ * Cookies are sent automatically because withCredentials: true
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = useAuthStore.getState().accessToken;
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
+    // Tokens are in HTTP-Only cookies - sent automatically
+    // No manual Authorization header needed
     return config;
   },
   (error: AxiosError) => {
@@ -36,6 +37,9 @@ apiClient.interceptors.request.use(
 
 /**
  * Response interceptor - Handle errors globally
+ *
+ * SECURITY NOTE: Token refresh now uses HTTP-Only cookies.
+ * Backend automatically reads refresh token from cookies and sets new cookies.
  */
 apiClient.interceptors.response.use(
   (response) => response,
@@ -47,27 +51,19 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = useAuthStore.getState().refreshToken;
+        // Call refresh endpoint - backend reads refresh token from HTTP-Only cookie
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {}, // Empty body - backend reads cookie
+          {
+            withCredentials: true, // Send cookies
+          }
+        );
 
-        if (!refreshToken) {
-          throw new Error('No refresh token available');
-        }
+        // Backend sets new HTTP-Only cookies automatically
+        // No need to manually store tokens
 
-        // Try to refresh token
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
-
-        const { accessToken } = response.data.data;
-
-        // Update token in store
-        useAuthStore.setState({ accessToken });
-
-        // Retry original request with new token
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
+        // Retry original request (new cookies will be sent automatically)
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed - clear auth and redirect to login

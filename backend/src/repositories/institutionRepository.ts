@@ -126,3 +126,24 @@ export const deactivateInstitution = async (id: string): Promise<void> => {
     [id]
   );
 };
+
+/**
+ * Reactivate institution
+ */
+export const reactivateInstitution = async (id: string): Promise<void> => {
+  await pool.query(
+    `UPDATE institutions
+    SET is_active = true,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $1`,
+    [id]
+  );
+};
+
+/**
+ * Delete institution permanently (GDPR compliance)
+ * CASCADE deletes all related data: users, patients, workers, orders
+ */
+export const deleteInstitution = async (id: string): Promise<void> => {
+  await pool.query('DELETE FROM institutions WHERE id = $1', [id]);
+};

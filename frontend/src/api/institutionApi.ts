@@ -57,3 +57,17 @@ export const verifyInstitution = async (id: string): Promise<void> => {
 export const deactivateInstitution = async (id: string): Promise<void> => {
   await apiClient.patch(`/institutions/${id}/deactivate`);
 };
+
+/**
+ * Reactivate institution
+ */
+export const reactivateInstitution = async (id: string): Promise<void> => {
+  await apiClient.patch(`/institutions/${id}/reactivate`);
+};
+
+/**
+ * Delete institution permanently
+ */
+export const deleteInstitution = async (id: string): Promise<void> => {
+  await apiClient.delete(`/institutions/${id}`);
+};

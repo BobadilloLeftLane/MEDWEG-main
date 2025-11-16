@@ -26,4 +26,10 @@ router.patch('/:id/verify', institutionController.verifyInstitution);
 // PATCH /api/v1/institutions/:id/deactivate
 router.patch('/:id/deactivate', institutionController.deactivateInstitution);
 
+// PATCH /api/v1/institutions/:id/reactivate
+router.patch('/:id/reactivate', institutionController.reactivateInstitution);
+
+// DELETE /api/v1/institutions/:id
+router.delete('/:id', institutionController.deleteInstitution);
+
 export default router;

@@ -12,9 +12,11 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
+  user?: User;
+  requiresEmailVerification?: boolean;
+  email?: string;
+  message?: string;
+  // SECURITY: Tokens are NOT in response (HTTP-Only cookies)
 }
 
 export interface WorkerLoginRequest {
@@ -47,12 +49,11 @@ export const logout = async (): Promise<void> => {
 
 /**
  * Refresh access token
+ * SECURITY: Tokens are read from and written to HTTP-Only cookies by backend
  */
-export const refreshAccessToken = async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
-  const response = await apiClient.post<ApiResponse<{ accessToken: string; refreshToken: string }>>('/auth/refresh', {
-    refreshToken,
-  });
-  return response.data.data;
+export const refreshAccessToken = async (): Promise<void> => {
+  await apiClient.post('/auth/refresh', {}); // Empty body - backend reads cookies
+  // Backend sets new HTTP-Only cookies automatically
 };
 
 /**
@@ -75,5 +76,38 @@ export interface RegisterResponse {
 
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
   const response = await apiClient.post<ApiResponse<RegisterResponse>>('/auth/register', data);
+  return response.data.data;
+};
+
+/**
+ * Verify Email with 6-digit code
+ */
+export interface VerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+}
+
+export const verifyEmail = async (data: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
+  const response = await apiClient.post<ApiResponse<VerifyEmailResponse>>('/auth/verify-email', data);
+  return response.data.data;
+};
+
+/**
+ * Resend verification code
+ */
+export interface ResendCodeRequest {
+  email: string;
+}
+
+export interface ResendCodeResponse {
+  message: string;
+}
+
+export const resendVerificationCode = async (data: ResendCodeRequest): Promise<ResendCodeResponse> => {
+  const response = await apiClient.post<ApiResponse<ResendCodeResponse>>('/auth/resend-code', data);
   return response.data.data;
 };

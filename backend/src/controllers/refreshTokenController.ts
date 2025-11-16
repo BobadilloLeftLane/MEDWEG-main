@@ -40,8 +40,8 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response): Pr
       success: true,
       message: 'Token erfolgreich aktualisiert',
       data: {
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
+        // SECURITY: Tokens are NOT sent in response body
+        // New tokens are set in HTTP-Only cookies above
       },
     });
   } catch (error) {

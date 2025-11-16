@@ -2,6 +2,7 @@ import { ValidationError, NotFoundError, ForbiddenError } from '../types';
 import * as orderRepo from '../repositories/orderRepository';
 import * as productRepo from '../repositories/productRepository';
 import * as productService from './productService';
+import * as emailService from './emailService';
 import logger from '../utils/logger';
 
 /**
@@ -96,6 +97,27 @@ export const createOrder = async (
     totalAmount: order.total_amount,
     scheduled_date: order.scheduled_date,
     createdBy: isWorker ? 'worker' : 'user',
+  });
+
+  // Send email notification to admin (async, non-blocking)
+  Promise.resolve().then(async () => {
+    try {
+      logger.info('Sending new order notification to admin...');
+
+      await emailService.sendNewOrderNotification();
+    } catch (error) {
+      logger.error('Failed to send admin order notification (non-blocking)', {
+        orderId: order.id,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    }
+  }).catch((error) => {
+    // Final safety net
+    logger.error('Unhandled error in order notification', {
+      orderId: order.id,
+      error: error instanceof Error ? error.message : String(error)
+    });
   });
 
   return order;

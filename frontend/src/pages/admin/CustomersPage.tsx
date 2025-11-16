@@ -38,6 +38,8 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Person as PersonIcon,
+  Refresh as RefreshIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import * as institutionApi from '../../api/institutionApi';
@@ -62,6 +64,8 @@ const CustomersPage = () => {
   // Dialogs
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [reactivateDialogOpen, setReactivateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Load institutions and patients
   const loadData = async () => {
@@ -190,6 +194,74 @@ const CustomersPage = () => {
   const handleDeactivateCancel = () => {
     console.log('Deactivate cancelled');
     setDeactivateDialogOpen(false);
+    setSelectedInstitution(null);
+  };
+
+  // Reactivate institution
+  const handleReactivateClick = () => {
+    console.log('Reactivate clicked, selectedInstitution:', selectedInstitution);
+    setAnchorEl(null);
+    setReactivateDialogOpen(true);
+  };
+
+  const handleReactivateConfirm = async () => {
+    console.log('Reactivate confirm clicked, selectedInstitution:', selectedInstitution);
+    if (!selectedInstitution) {
+      console.log('No selected institution, returning');
+      return;
+    }
+
+    try {
+      console.log('Calling reactivateInstitution API for ID:', selectedInstitution.id);
+      await institutionApi.reactivateInstitution(selectedInstitution.id);
+      console.log('Reactivation successful');
+      toast.success('Kunde erfolgreich reaktiviert');
+      setReactivateDialogOpen(false);
+      setSelectedInstitution(null);
+      await loadData();
+    } catch (error: any) {
+      console.error('Reactivation error:', error);
+      toast.error(error.response?.data?.error || 'Fehler beim Reaktivieren');
+    }
+  };
+
+  const handleReactivateCancel = () => {
+    console.log('Reactivate cancelled');
+    setReactivateDialogOpen(false);
+    setSelectedInstitution(null);
+  };
+
+  // Delete institution
+  const handleDeleteClick = () => {
+    console.log('Delete clicked, selectedInstitution:', selectedInstitution);
+    setAnchorEl(null);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    console.log('Delete confirm clicked, selectedInstitution:', selectedInstitution);
+    if (!selectedInstitution) {
+      console.log('No selected institution, returning');
+      return;
+    }
+
+    try {
+      console.log('Calling deleteInstitution API for ID:', selectedInstitution.id);
+      await institutionApi.deleteInstitution(selectedInstitution.id);
+      console.log('Deletion successful');
+      toast.success('Kunde erfolgreich gelöscht');
+      setDeleteDialogOpen(false);
+      setSelectedInstitution(null);
+      await loadData();
+    } catch (error: any) {
+      console.error('Deletion error:', error);
+      toast.error(error.response?.data?.error || 'Fehler beim Löschen');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    console.log('Delete cancelled');
+    setDeleteDialogOpen(false);
     setSelectedInstitution(null);
   };
 
@@ -379,9 +451,21 @@ const CustomersPage = () => {
           </MenuItem>
         )}
         {selectedInstitution && selectedInstitution.is_active && (
-          <MenuItem onClick={handleDeactivateClick} sx={{ color: 'error.main' }}>
+          <MenuItem onClick={handleDeactivateClick} sx={{ color: 'warning.main' }}>
             <BlockIcon fontSize="small" sx={{ mr: 1 }} />
             Deaktivieren
+          </MenuItem>
+        )}
+        {selectedInstitution && !selectedInstitution.is_active && (
+          <MenuItem onClick={handleReactivateClick} sx={{ color: 'success.main' }}>
+            <RefreshIcon fontSize="small" sx={{ mr: 1 }} />
+            Reaktivieren
+          </MenuItem>
+        )}
+        {selectedInstitution && !selectedInstitution.is_active && (
+          <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+            <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+            Löschen
           </MenuItem>
         )}
       </Menu>
@@ -414,8 +498,43 @@ const CustomersPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeactivateCancel}>Abbrechen</Button>
-          <Button onClick={handleDeactivateConfirm} color="error" variant="contained">
+          <Button onClick={handleDeactivateConfirm} color="warning" variant="contained">
             Deaktivieren
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reactivate Dialog */}
+      <Dialog open={reactivateDialogOpen} onClose={handleReactivateCancel}>
+        <DialogTitle>Kunde reaktivieren?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Möchten Sie den Kunden "{selectedInstitution?.name}" reaktivieren? Der Kunde kann dann
+            wieder Bestellungen aufgeben.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleReactivateCancel}>Abbrechen</Button>
+          <Button onClick={handleReactivateConfirm} color="success" variant="contained">
+            Reaktivieren
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Kunde permanent löschen?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <strong>WARNUNG:</strong> Möchten Sie den Kunden "{selectedInstitution?.name}" wirklich
+            permanent löschen? Diese Aktion kann <strong>NICHT</strong> rückgängig gemacht werden.
+            Alle zugehörigen Daten (Patienten, Bestellungen, etc.) werden ebenfalls gelöscht.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Abbrechen</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Permanent Löschen
           </Button>
         </DialogActions>
       </Dialog>

@@ -13,10 +13,10 @@ import {
 } from '../types';
 import * as userRepo from '../repositories/userRepository';
 import * as institutionRepo from '../repositories/institutionRepository';
+import * as emailService from './emailService';
 import { hashPassword, verifyPassword, validatePasswordStrength } from '../utils/password';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import { encrypt } from '../utils/encryption';
-import { sendVerificationEmail, sendPasswordResetEmail } from './emailService';
 import { UserModel } from '../models/User';
 import logger from '../utils/logger';
 import crypto from 'crypto';
@@ -75,7 +75,8 @@ export const register = async (data: RegisterDto): Promise<{ message: string; em
   // 6. Generate verification code (expires in 5 minutes)
   const verificationCode = generateVerificationCode();
   const codeExpiresAt = new Date();
-  codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + 5);
+  const expiryMinutes = parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY_MINUTES || '10', 10);
+  codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + expiryMinutes);
 
   // 7. Create user (Admin Institution)
   const user = await userRepo.createUser({
@@ -90,7 +91,7 @@ export const register = async (data: RegisterDto): Promise<{ message: string; em
   logger.info('User registered', { userId: user.id, email: user.email, role: user.role });
 
   // 8. Send verification email
-  await sendVerificationEmail(data.email, verificationCode);
+  await emailService.sendVerificationEmail(data.email, verificationCode);
 
   return {
     message: 'Registrierung erfolgreich. Bitte überprüfen Sie Ihre E-Mail.',
@@ -131,7 +132,26 @@ export const verifyEmail = async (data: VerifyEmailDto): Promise<{ message: stri
     await institutionRepo.verifyInstitution(user.institution_id);
   }
 
-  logger.info('Email verified', { userId: user.id, email: user.email });
+  // 7. Get institution name for welcome email
+  let institutionName = 'Kunde';
+  if (user.institution_id) {
+    const institution = await institutionRepo.findInstitutionById(user.institution_id);
+    if (institution) {
+      institutionName = institution.name;
+    }
+  }
+
+  // 8. Send welcome email (async, don't block verification)
+  emailService.sendWelcomeEmail(user.email, institutionName).catch((error: any) => {
+    logger.error('Failed to send welcome email (non-blocking)', { error });
+  });
+
+  // 9. Send admin notification (async, don't block verification)
+  emailService.sendAdminNewUserNotification(institutionName, user.email).catch((error: any) => {
+    logger.error('Failed to send admin notification (non-blocking)', { error });
+  });
+
+  logger.info('Email verified successfully', { userId: user.id, email: user.email });
 
   return {
     message: 'E-Mail erfolgreich verifiziert. Sie können sich jetzt anmelden.',
@@ -156,13 +176,14 @@ export const resendVerificationCode = async (email: string): Promise<{ message: 
   // 3. Generate new code
   const verificationCode = generateVerificationCode();
   const codeExpiresAt = new Date();
-  codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + 5);
+  const expiryMinutes = parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY_MINUTES || '10', 10);
+  codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + expiryMinutes);
 
   // 4. Update code in DB
   await userRepo.updateVerificationCode(user.id, verificationCode, codeExpiresAt);
 
   // 5. Send email
-  await sendVerificationEmail(email, verificationCode);
+  await emailService.sendVerificationEmail(email, verificationCode);
 
   logger.info('Verification code resent', { email });
 
@@ -181,20 +202,25 @@ export const login = async (data: LoginDto): Promise<LoginResponse> => {
     throw new UnauthorizedError('Ungültige Anmeldedaten');
   }
 
-  // 2. Check if verified
-  if (!user.is_verified) {
-    throw new UnauthorizedError('E-Mail ist nicht verifiziert');
-  }
-
-  // 3. Check if active
+  // 2. Check if active FIRST
   if (!user.is_active) {
     throw new UnauthorizedError('Benutzerkonto wurde deaktiviert');
   }
 
-  // 4. Verify password
+  // 3. Verify password BEFORE checking verification status (security best practice)
   const isPasswordValid = await verifyPassword(data.password, user.password_hash);
   if (!isPasswordValid) {
     throw new UnauthorizedError('Ungültige Anmeldedaten');
+  }
+
+  // 4. Check if verified - if not, return verification needed response instead of throwing error
+  // ВАЖНО: Provera ide POSLE password verifikacije da bi se sprečilo otkrivanje validnih email-ova
+  if (!user.is_verified) {
+    return {
+      requiresEmailVerification: true,
+      email: user.email,
+      message: 'E-Mail-Verifizierung erforderlich',
+    };
   }
 
   // 5. Update last login
@@ -310,7 +336,7 @@ export const forgotPassword = async (data: ForgotPasswordDto): Promise<{ message
 
   // 4. Send reset email
   const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-  await sendPasswordResetEmail(data.email, resetLink);
+  await emailService.sendPasswordResetEmail(data.email, resetLink);
 
   logger.info('Password reset requested', { email: data.email });
 
