@@ -122,12 +122,13 @@ const InstitutionDashboard = () => {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: { xs: 3, md: 4 } }}>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
             mb: 1,
+            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' },
             background: 'linear-gradient(135deg, #10B981 0%, #2563EB 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
@@ -136,37 +137,37 @@ const InstitutionDashboard = () => {
         >
           Pflegedienst Dashboard
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>
           Übersicht für {currentMonth}
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
         {/* Stats Cards */}
         <Grid item xs={12} sm={6} lg={3}>
           <Card>
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                     Meine Patienten
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#2563EB' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#2563EB', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                     {patients.length}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                     Aktive Patienten
                   </Typography>
                 </Box>
                 <Box
                   sx={{
-                    p: 1.5,
+                    p: { xs: 1, sm: 1.25, md: 1.5 },
                     borderRadius: 2,
                     bgcolor: 'rgba(37, 99, 235, 0.1)',
                     color: '#2563EB',
                   }}
                 >
-                  <People sx={{ fontSize: 32 }} />
+                  <People sx={{ fontSize: { xs: 24, sm: 28, md: 32 } }} />
                 </Box>
               </Box>
             </CardContent>
@@ -175,28 +176,28 @@ const InstitutionDashboard = () => {
 
         <Grid item xs={12} sm={6} lg={3}>
           <Card>
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                     Monatliche Ausgaben
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#EF4444' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#EF4444', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                     €{monthlySpending.toFixed(2)}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                     {currentMonth}
                   </Typography>
                 </Box>
                 <Box
                   sx={{
-                    p: 1.5,
+                    p: { xs: 1, sm: 1.25, md: 1.5 },
                     borderRadius: 2,
                     bgcolor: 'rgba(239, 68, 68, 0.1)',
                     color: '#EF4444',
                   }}
                 >
-                  <TrendingUp sx={{ fontSize: 32 }} />
+                  <TrendingUp sx={{ fontSize: { xs: 24, sm: 28, md: 32 } }} />
                 </Box>
               </Box>
             </CardContent>
@@ -205,28 +206,28 @@ const InstitutionDashboard = () => {
 
         <Grid item xs={12} sm={6} lg={3}>
           <Card>
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                     In Bearbeitung
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#F59E0B' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#F59E0B', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                     {pendingOrders.length}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                     Nicht bestätigt
                   </Typography>
                 </Box>
                 <Box
                   sx={{
-                    p: 1.5,
+                    p: { xs: 1, sm: 1.25, md: 1.5 },
                     borderRadius: 2,
                     bgcolor: 'rgba(245, 158, 11, 0.1)',
                     color: '#F59E0B',
                   }}
                 >
-                  <HourglassEmpty sx={{ fontSize: 32 }} />
+                  <HourglassEmpty sx={{ fontSize: { xs: 24, sm: 28, md: 32 } }} />
                 </Box>
               </Box>
             </CardContent>
@@ -235,28 +236,28 @@ const InstitutionDashboard = () => {
 
         <Grid item xs={12} sm={6} lg={3}>
           <Card>
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                     ⌀ Material/Patient
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                     {Math.round(avgMaterialPerPatient)} Stück
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                     Pro Monat
                   </Typography>
                 </Box>
                 <Box
                   sx={{
-                    p: 1.5,
+                    p: { xs: 1, sm: 1.25, md: 1.5 },
                     borderRadius: 2,
                     bgcolor: 'rgba(16, 185, 129, 0.1)',
                     color: '#10B981',
                   }}
                 >
-                  <Inventory sx={{ fontSize: 32 }} />
+                  <Inventory sx={{ fontSize: { xs: 24, sm: 28, md: 32 } }} />
                 </Box>
               </Box>
             </CardContent>
@@ -265,10 +266,10 @@ const InstitutionDashboard = () => {
 
         {/* Pending Orders List */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{ p: { xs: 2, sm: 2.5, md: 3 }, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <HourglassEmpty sx={{ mr: 1, color: '#F59E0B' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <HourglassEmpty sx={{ mr: 1, color: '#F59E0B', fontSize: { xs: 20, md: 24 } }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.15rem', md: '1.25rem' } }}>
                 Bestellungen in Bearbeitung
               </Typography>
             </Box>
@@ -320,10 +321,10 @@ const InstitutionDashboard = () => {
 
         {/* Shipped Orders List */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+          <Paper sx={{ p: { xs: 2, sm: 2.5, md: 3 }, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <LocalShipping sx={{ mr: 1, color: '#2563EB' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <LocalShipping sx={{ mr: 1, color: '#2563EB', fontSize: { xs: 20, md: 24 } }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.15rem', md: '1.25rem' } }}>
                 Versendete Bestellungen
               </Typography>
             </Box>
@@ -379,25 +380,25 @@ const InstitutionDashboard = () => {
 
         {/* Material Statistics */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Inventory sx={{ mr: 1, color: '#10B981' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              <Inventory sx={{ mr: 1, color: '#10B981', fontSize: { xs: 20, md: 24 } }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1.1rem', sm: '1.15rem', md: '1.25rem' } }}>
                 Materialverbrauch pro Patient (Monatlich)
               </Typography>
             </Box>
-            <Divider sx={{ mb: 3 }} />
-            <Grid container spacing={3}>
+            <Divider sx={{ mb: { xs: 2, md: 3 } }} />
+            <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
               <Grid item xs={12} md={4}>
                 <Card sx={{ bgcolor: 'rgba(16, 185, 129, 0.05)' }}>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                       Durchschnitt/Patient
                     </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#10B981', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                       {Math.round(avgMaterialPerPatient)} Stück
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                       Basierend auf {patients.length} Patienten
                     </Typography>
                   </CardContent>
@@ -405,14 +406,14 @@ const InstitutionDashboard = () => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <Card sx={{ bgcolor: 'rgba(239, 68, 68, 0.05)' }}>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                       Gesamtmaterial
                     </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#EF4444' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#EF4444', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                       {totalMaterialUnits} Stück
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                       {currentMonth}
                     </Typography>
                   </CardContent>
@@ -420,14 +421,14 @@ const InstitutionDashboard = () => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <Card sx={{ bgcolor: 'rgba(37, 99, 235, 0.05)' }}>
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                       Gesamtkosten
                     </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#2563EB' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#2563EB', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}>
                       €{monthlySpending.toFixed(2)}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
                       {currentMonth}
                     </Typography>
                   </CardContent>
@@ -436,8 +437,8 @@ const InstitutionDashboard = () => {
             </Grid>
 
             {patients.length > 0 && totalMaterialUnits > 0 && (
-              <Alert severity="info" sx={{ mt: 3 }}>
-                <Typography variant="body2">
+              <Alert severity="info" sx={{ mt: { xs: 2, md: 3 } }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.85rem', sm: '0.875rem' } }}>
                   <strong>Materialverbrauch:</strong> Bei {patients.length} Patienten wurden insgesamt{' '}
                   <strong>{totalMaterialUnits} Stück</strong> Material bestellt, das entspricht durchschnittlich{' '}
                   <strong>{Math.round(avgMaterialPerPatient)} Stück pro Patient</strong> für {currentMonth}.
