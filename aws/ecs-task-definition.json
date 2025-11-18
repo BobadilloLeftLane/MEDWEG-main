@@ -1,0 +1,149 @@
+{
+  "family": "medweg-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "medweg-backend",
+      "image": "YOUR_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/medweg-backend:latest",
+      "cpu": 512,
+      "memory": 1024,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "PORT",
+          "value": "5000"
+        },
+        {
+          "name": "API_VERSION",
+          "value": "v1"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-central-1"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/db-host"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/db-name"
+        },
+        {
+          "name": "DB_USER",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/db-user"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/db-password"
+        },
+        {
+          "name": "DB_ENCRYPTION_KEY",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/db-encryption-key"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/jwt-secret"
+        },
+        {
+          "name": "JWT_REFRESH_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/jwt-refresh-secret"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/aws-access-key-id"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/aws-secret-key"
+        },
+        {
+          "name": "VAPID_PUBLIC_KEY",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/vapid-public-key"
+        },
+        {
+          "name": "VAPID_PRIVATE_KEY",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/vapid-private-key"
+        },
+        {
+          "name": "EMAIL_USER",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/email-user"
+        },
+        {
+          "name": "EMAIL_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:eu-central-1:YOUR_ACCOUNT_ID:secret:medweg/email-password"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/medweg-backend",
+          "awslogs-region": "eu-central-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    },
+    {
+      "name": "medweg-frontend",
+      "image": "YOUR_ACCOUNT_ID.dkr.ecr.eu-central-1.amazonaws.com/medweg-frontend:latest",
+      "cpu": 512,
+      "memory": 1024,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "dependsOn": [
+        {
+          "containerName": "medweg-backend",
+          "condition": "HEALTHY"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/medweg-frontend",
+          "awslogs-region": "eu-central-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      }
+    }
+  ]
+}

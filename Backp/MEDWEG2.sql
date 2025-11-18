@@ -1381,4 +1381,3 @@ ALTER TABLE ONLY public.workers
 --
 -- PostgreSQL database dump complete
 --
-
