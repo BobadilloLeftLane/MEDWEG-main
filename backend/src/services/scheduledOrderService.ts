@@ -18,7 +18,7 @@ export const checkAndCreateOrders = async () => {
     const now = new Date();
     const todayDayOfMonth = now.getDate();
 
-    logger.info('🔄 Running scheduled order creation check', {
+    logger.info(' Running scheduled order creation check', {
       time: now.toISOString(),
       dayOfMonth: todayDayOfMonth,
     });
@@ -27,11 +27,11 @@ export const checkAndCreateOrders = async () => {
     const templates = await recurringRepo.getTemplatesNeedingExecution(todayDayOfMonth);
 
     if (templates.length === 0) {
-      logger.info('✅ No templates to execute today');
+      logger.info(' No templates to execute today');
       return;
     }
 
-    logger.info(`📋 Found ${templates.length} templates to execute`);
+    logger.info(` Found ${templates.length} templates to execute`);
 
     let totalOrdersCreated = 0;
 
@@ -63,7 +63,7 @@ export const checkAndCreateOrders = async () => {
           });
 
           orderIds.push(order.id);
-          logger.info(`✅ Created recurring order for patient`, {
+          logger.info(` Created recurring order for patient`, {
             orderId: order.id,
             templateId: template.id,
             patientId: template.patient_id,
@@ -72,7 +72,7 @@ export const checkAndCreateOrders = async () => {
           // Create orders for ALL active patients
           const patients = await patientRepo.getPatientsByInstitution(template.institution_id, true);
 
-          logger.info(`📦 Creating orders for ${patients.length} patients`, {
+          logger.info(` Creating orders for ${patients.length} patients`, {
             templateId: template.id,
             institutionId: template.institution_id,
           });
@@ -90,7 +90,7 @@ export const checkAndCreateOrders = async () => {
             orderIds.push(order.id);
           }
 
-          logger.info(`✅ Created ${orderIds.length} recurring orders for all patients`, {
+          logger.info(` Created ${orderIds.length} recurring orders for all patients`, {
             templateId: template.id,
           });
         }
@@ -107,19 +107,19 @@ export const checkAndCreateOrders = async () => {
           await recurringRepo.markOrdersCreated(execution.id, orderIds);
         }
       } catch (error) {
-        logger.error('❌ Error creating orders for template', {
+        logger.error(' Error creating orders for template', {
           templateId: template.id,
           error: error instanceof Error ? error.message : error,
         });
       }
     }
 
-    logger.info(`🎉 Scheduled order creation completed`, {
+    logger.info(` Scheduled order creation completed`, {
       templatesProcessed: templates.length,
       totalOrdersCreated,
     });
   } catch (error) {
-    logger.error('❌ Error in scheduled order creation', {
+    logger.error(' Error in scheduled order creation', {
       error: error instanceof Error ? error.message : error,
     });
   }
@@ -136,5 +136,5 @@ export const startScheduledJobs = () => {
     await checkAndCreateOrders();
   });
 
-  logger.info('✅ Scheduled jobs initialized - Daily order creation at 13:00');
+  logger.info(' Scheduled jobs initialized - Daily order creation at 13:00');
 };

@@ -54,7 +54,7 @@ export const submitContactForm = async (req: Request, res: Response): Promise<vo
       trimmedSubject
     );
 
-    logger.info('✅ Contact form processed successfully', {
+    logger.info(' Contact form processed successfully', {
       name: trimmedName,
       email: trimmedEmail,
     });
@@ -64,7 +64,7 @@ export const submitContactForm = async (req: Request, res: Response): Promise<vo
       message: 'Nachricht erfolgreich gesendet. Wir werden uns in Kürze bei Ihnen melden.',
     });
   } catch (error: any) {
-    logger.error('❌ Contact form submission failed', {
+    logger.error(' Contact form submission failed', {
       error: error.message,
       stack: error.stack,
     });

@@ -13,7 +13,7 @@ const seedOrders = async () => {
   const client = await pool.connect();
 
   try {
-    console.log('🌱 Starting order seeding...\n');
+    console.log(' Starting order seeding...\n');
 
     await client.query('BEGIN');
 
@@ -27,7 +27,7 @@ const seedOrders = async () => {
     const liquids = products.filter(p => p.type === 'disinfectant_liquid');
     const wipes = products.filter(p => p.type === 'disinfectant_wipes');
 
-    console.log(`📦 Found products:`);
+    console.log(` Found products:`);
     console.log(`   - ${gloves.length} glove products`);
     console.log(`   - ${liquids.length} disinfectant liquid products`);
     console.log(`   - ${wipes.length} disinfectant wipes products\n`);
@@ -38,7 +38,7 @@ const seedOrders = async () => {
     );
     const institutions = institutionsResult.rows;
 
-    console.log(`🏥 Found ${institutions.length} institutions\n`);
+    console.log(` Found ${institutions.length} institutions\n`);
 
     let totalOrders = 0;
     let totalItems = 0;
@@ -53,7 +53,7 @@ const seedOrders = async () => {
       const patients = patientsResult.rows;
 
       if (patients.length === 0) {
-        console.log(`  ⚠️  ${institution.name}: No patients, skipping`);
+        console.log(`    ${institution.name}: No patients, skipping`);
         continue;
       }
 
@@ -178,18 +178,18 @@ const seedOrders = async () => {
           totalItems += orderItems.length;
 
         } catch (error: any) {
-          console.error(`  ❌ Error creating order for patient in ${institution.name}:`, error.message);
+          console.error(`   Error creating order for patient in ${institution.name}:`, error.message);
         }
       }
 
-      console.log(`  ✅ ${institution.name}: ${institutionOrders} orders created`);
+      console.log(`   ${institution.name}: ${institutionOrders} orders created`);
     }
 
     await client.query('COMMIT');
 
-    console.log(`\n✨ Successfully created ${totalOrders} orders!`);
-    console.log(`📊 Total order items: ${totalItems}`);
-    console.log(`📊 Average items per order: ${Math.round(totalItems / totalOrders)}`);
+    console.log(`\n Successfully created ${totalOrders} orders!`);
+    console.log(` Total order items: ${totalItems}`);
+    console.log(` Average items per order: ${Math.round(totalItems / totalOrders)}`);
 
     // Show some statistics
     const statsResult = await client.query(
@@ -203,7 +203,7 @@ const seedOrders = async () => {
     );
 
     const stats = statsResult.rows[0];
-    console.log(`\n📈 Order Statistics:`);
+    console.log(`\n Order Statistics:`);
     console.log(`   Total Orders: ${stats.total_orders}`);
     console.log(`   Total Revenue: €${Number(stats.total_revenue).toFixed(2)}`);
     console.log(`   Average Order Value: €${Number(stats.avg_order_value).toFixed(2)}`);
@@ -211,7 +211,7 @@ const seedOrders = async () => {
     console.log(`   Max Order: €${Number(stats.max_order).toFixed(2)}`);
 
     // Show example orders
-    console.log('\n📋 Example orders:');
+    console.log('\n Example orders:');
     const examplesResult = await client.query(
       `SELECT
         o.order_number,
@@ -235,7 +235,7 @@ const seedOrders = async () => {
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Error seeding orders:', error);
+    console.error(' Error seeding orders:', error);
     throw error;
   } finally {
     client.release();
@@ -246,10 +246,10 @@ const seedOrders = async () => {
 // Run the script
 seedOrders()
   .then(() => {
-    console.log('\n✅ Order seeding completed successfully!');
+    console.log('\n Order seeding completed successfully!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Order seeding failed:', error);
+    console.error(' Order seeding failed:', error);
     process.exit(1);
   });

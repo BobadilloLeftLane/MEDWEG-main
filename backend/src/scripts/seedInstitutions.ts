@@ -94,7 +94,7 @@ const seedInstitutions = async () => {
   const client = await pool.connect();
 
   try {
-    console.log('🌱 Starting institution seeding...\n');
+    console.log(' Starting institution seeding...\n');
 
     await client.query('BEGIN');
 
@@ -131,19 +131,19 @@ const seedInstitutions = async () => {
 
         // Progress indicator
         if ((i + 1) % 10 === 0) {
-          console.log(`✅ Created ${i + 1}/100 institutions...`);
+          console.log(` Created ${i + 1}/100 institutions...`);
         }
 
       } catch (error: any) {
-        console.error(`❌ Error creating institution ${i + 1}:`, error.message);
+        console.error(` Error creating institution ${i + 1}:`, error.message);
       }
     }
 
     await client.query('COMMIT');
 
-    console.log(`\n✨ Successfully created ${successCount}/100 institutions!`);
-    console.log(`\n📧 All institutions have admin accounts with password: Admin123!`);
-    console.log(`\n📋 Example logins:`);
+    console.log(`\n Successfully created ${successCount}/100 institutions!`);
+    console.log(`\n All institutions have admin accounts with password: Admin123!`);
+    console.log(`\n Example logins:`);
 
     // Show first 5 examples
     const examples = await client.query(
@@ -164,7 +164,7 @@ const seedInstitutions = async () => {
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Error seeding institutions:', error);
+    console.error(' Error seeding institutions:', error);
     throw error;
   } finally {
     client.release();
@@ -175,10 +175,10 @@ const seedInstitutions = async () => {
 // Run the script
 seedInstitutions()
   .then(() => {
-    console.log('\n✅ Seeding completed successfully!');
+    console.log('\n Seeding completed successfully!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Seeding failed:', error);
+    console.error(' Seeding failed:', error);
     process.exit(1);
   });

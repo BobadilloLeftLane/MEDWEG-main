@@ -83,9 +83,9 @@ export const createOrder = async (data: {
       0
     );
 
-    console.log('📅 Repository - scheduled_date received:', data.scheduled_date);
-    console.log('📅 Repository - scheduled_date type:', typeof data.scheduled_date);
-    console.log('📅 Repository - scheduled_date value to insert:', data.scheduled_date || null);
+    console.log(' Repository - scheduled_date received:', data.scheduled_date);
+    console.log(' Repository - scheduled_date type:', typeof data.scheduled_date);
+    console.log(' Repository - scheduled_date value to insert:', data.scheduled_date || null);
 
     // Create order
     const orderResult = await client.query(
@@ -107,7 +107,7 @@ export const createOrder = async (data: {
       ]
     );
 
-    console.log('📅 Repository - Order created, scheduled_date in DB:', orderResult.rows[0].scheduled_date);
+    console.log(' Repository - Order created, scheduled_date in DB:', orderResult.rows[0].scheduled_date);
 
     const order = orderResult.rows[0];
 

@@ -20,9 +20,9 @@ const transporter = nodemailer.createTransport({
 // Verify SMTP connection on startup
 transporter.verify((error) => {
   if (error) {
-    logger.error('❌ Email service configuration error:', error);
+    logger.error(' Email service configuration error:', error);
   } else {
-    logger.info('✅ Email service ready (Gmail SMTP)');
+    logger.info(' Email service ready (Gmail SMTP)');
   }
 });
 
@@ -76,7 +76,7 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
           </div>
 
           <div class="timer-box">
-            <p class="timer-text">⏱️ Wichtiger Hinweis:</p>
+            <p class="timer-text">⏱ Wichtiger Hinweis:</p>
             <p class="timer-countdown">Dieser Code ist ${expiryMinutes} Minuten gültig</p>
             <p style="margin: 10px 0 0 0; font-size: 13px; color: #856404;">
               Nach Ablauf der Zeit wird der Code ungültig und Sie müssen einen neuen anfordern.
@@ -85,7 +85,7 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
 
           <div class="resend-box">
             <p style="margin: 0; font-size: 14px; color: #1565C0;">
-              <strong>📧 Code nicht erhalten?</strong><br>
+              <strong> Code nicht erhalten?</strong><br>
               Sie können in der Anwendung auf "Erneut senden" klicken, um einen neuen Code zu erhalten.
             </p>
           </div>
@@ -96,7 +96,7 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
 
           <div class="feature-list">
             <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #009688;">
-              ✓ Was Sie bei MEDWEG erwartet:
+               Was Sie bei MEDWEG erwartet:
             </p>
             <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.8;">
               • Höchste Qualitätsstandards nach EU-Richtlinien<br>
@@ -111,7 +111,7 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
         <div class="footer">
           <p style="margin: 0 0 10px 0;"><strong>MEDWEG Bavaria</strong></p>
           <p style="margin: 5px 0;">Augsburg, Deutschland</p>
-          <p style="margin: 5px 0;">📧 E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688; text-decoration: none;">service.medwegbavaria@gmail.com</a></p>
+          <p style="margin: 5px 0;"> E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688; text-decoration: none;">service.medwegbavaria@gmail.com</a></p>
           <p style="margin-top: 20px; color: #999; font-size: 11px;">
             Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese Nachricht.<br>
             Bei Fragen wenden Sie sich bitte an unseren Support.
@@ -125,7 +125,7 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: email,
-    subject: '🔐 Verifizieren Sie Ihre E-Mail-Adresse - MEDWEG Bavaria',
+    subject: ' Verifizieren Sie Ihre E-Mail-Adresse - MEDWEG Bavaria',
     html: htmlContent,
     attachments: [
       {
@@ -138,9 +138,9 @@ export const sendVerificationEmail = async (email: string, code: string): Promis
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Verification email sent', { email });
+    logger.info(' Verification email sent', { email });
   } catch (error) {
-    logger.error('❌ Failed to send verification email', { email, error });
+    logger.error(' Failed to send verification email', { email, error });
     throw new Error('E-Mail konnte nicht gesendet werden');
   }
 };
@@ -171,36 +171,36 @@ export const sendWelcomeEmail = async (email: string, institutionName: string): 
       <div class="container">
         <div class="header">
           <img src="cid:logo" alt="MEDWEG Bavaria Logo" style="max-width: 250px; height: auto; margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; display: block; margin-left: auto; margin-right: auto;" />
-          <h1>✅ Willkommen bei MEDWEG!</h1>
+          <h1> Willkommen bei MEDWEG!</h1>
           <p style="margin: 10px 0 0 0; font-size: 18px;">Ihr Konto wurde erfolgreich aktiviert</p>
         </div>
 
         <div class="content">
           <div class="success-badge">
-            <h2 style="margin: 0;">🎉 Herzlich willkommen, ${institutionName}!</h2>
+            <h2 style="margin: 0;"> Herzlich willkommen, ${institutionName}!</h2>
           </div>
 
           <p style="font-size: 16px;">Vielen Dank, dass Sie sich für MEDWEG Bavaria entschieden haben. Wir freuen uns auf die zukünftige Zusammenarbeit!</p>
 
-          <h3 style="color: #009688; margin-top: 30px;">📋 Ihre nächsten Schritte:</h3>
+          <h3 style="color: #009688; margin-top: 30px;"> Ihre nächsten Schritte:</h3>
 
           <div class="feature-box">
-            <strong>1️⃣ Dashboard erkunden</strong><br>
+            <strong>1⃣ Dashboard erkunden</strong><br>
             Melden Sie sich an und entdecken Sie alle Funktionen Ihres persönlichen Dashboards.
           </div>
 
           <div class="feature-box">
-            <strong>2️⃣ Patienten anlegen</strong><br>
+            <strong>2⃣ Patienten anlegen</strong><br>
             Fügen Sie Ihre Patienten hinzu und verwalten Sie deren Bestellungen zentral.
           </div>
 
           <div class="feature-box">
-            <strong>3️⃣ Erste Bestellung aufgeben</strong><br>
+            <strong>3⃣ Erste Bestellung aufgeben</strong><br>
             Wählen Sie aus unserem hochwertigen Sortiment medizinischer Produkte.
           </div>
 
           <div class="feature-box">
-            <strong>4️⃣ Automatisierung einrichten</strong><br>
+            <strong>4⃣ Automatisierung einrichten</strong><br>
             Nutzen Sie wiederkehrende Bestellungen für maximale Effizienz.
           </div>
 
@@ -212,17 +212,17 @@ export const sendWelcomeEmail = async (email: string, institutionName: string): 
 
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
 
-          <h3 style="color: #009688;">💼 Was Sie bei uns erwartet:</h3>
+          <h3 style="color: #009688;"> Was Sie bei uns erwartet:</h3>
 
           <p>
-            ✓ <strong>Premium Qualität:</strong> Alle Produkte erfüllen höchste medizinische Standards<br>
-            ✓ <strong>Schnelle Lieferung:</strong> Zuverlässige und pünktliche Zustellung<br>
-            ✓ <strong>Persönlicher Service:</strong> Unser Team steht Ihnen jederzeit zur Verfügung<br>
-            ✓ <strong>Digitale Verwaltung:</strong> Komplette Transparenz über Bestellungen und Statistiken
+             <strong>Premium Qualität:</strong> Alle Produkte erfüllen höchste medizinische Standards<br>
+             <strong>Schnelle Lieferung:</strong> Zuverlässige und pünktliche Zustellung<br>
+             <strong>Persönlicher Service:</strong> Unser Team steht Ihnen jederzeit zur Verfügung<br>
+             <strong>Digitale Verwaltung:</strong> Komplette Transparenz über Bestellungen und Statistiken
           </p>
 
           <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <strong>📞 Brauchen Sie Hilfe?</strong><br>
+            <strong> Brauchen Sie Hilfe?</strong><br>
             Unser Support-Team ist für Sie da:<br>
             E-Mail: <a href="mailto:service.medwegbavaria@gmail.com">service.medwegbavaria@gmail.com</a>
           </div>
@@ -244,7 +244,7 @@ export const sendWelcomeEmail = async (email: string, institutionName: string): 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: email,
-    subject: '🎉 Willkommen bei MEDWEG Bavaria - Ihr Konto ist aktiviert!',
+    subject: ' Willkommen bei MEDWEG Bavaria - Ihr Konto ist aktiviert!',
     html: htmlContent,
     attachments: [
       {
@@ -257,9 +257,9 @@ export const sendWelcomeEmail = async (email: string, institutionName: string): 
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Welcome email sent', { email });
+    logger.info(' Welcome email sent', { email });
   } catch (error) {
-    logger.error('❌ Failed to send welcome email', { email, error });
+    logger.error(' Failed to send welcome email', { email, error });
     // Don't throw - welcome email failure shouldn't block verification
   }
 };
@@ -292,13 +292,13 @@ export const sendAdminNewUserNotification = async (
     <body>
       <div class="container">
         <div class="header">
-          <h1>🎉 Neue Benutzerregistrierung</h1>
+          <h1> Neue Benutzerregistrierung</h1>
           <p style="margin: 5px 0 0 0;">Ein neuer Kunde hat sich erfolgreich verifiziert</p>
         </div>
 
         <div class="content">
           <div class="info-box">
-            <h3 style="margin: 0 0 15px 0; color: #2196F3;">📋 Benutzerdetails:</h3>
+            <h3 style="margin: 0 0 15px 0; color: #2196F3;"> Benutzerdetails:</h3>
             <div class="user-details">
               <p style="margin: 8px 0;"><strong>Institution:</strong> ${userName}</p>
               <p style="margin: 8px 0;"><strong>E-Mail:</strong> ${userEmail}</p>
@@ -307,13 +307,13 @@ export const sendAdminNewUserNotification = async (
                 dateStyle: 'full',
                 timeStyle: 'short'
               })}</p>
-              <p style="margin: 8px 0;"><strong>Status:</strong> <span style="color: #4CAF50; font-weight: 600;">✓ E-Mail verifiziert</span></p>
+              <p style="margin: 8px 0;"><strong>Status:</strong> <span style="color: #4CAF50; font-weight: 600;"> E-Mail verifiziert</span></p>
             </div>
           </div>
 
           <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 18px; margin: 20px 0; border-radius: 8px;">
             <p style="margin: 0; color: #856404;">
-              <strong>⚠️ Hinweis:</strong> Der Benutzer wartet möglicherweise auf die Freischaltung durch einen Administrator im Admin-Dashboard.
+              <strong> Hinweis:</strong> Der Benutzer wartet möglicherweise auf die Freischaltung durch einen Administrator im Admin-Dashboard.
             </p>
           </div>
 
@@ -336,15 +336,15 @@ export const sendAdminNewUserNotification = async (
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: adminEmail,
-    subject: `🔔 Neue Registrierung: ${userName}`,
+    subject: ` Neue Registrierung: ${userName}`,
     html: htmlContent,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Admin notification sent for new user', { userName, userEmail });
+    logger.info(' Admin notification sent for new user', { userName, userEmail });
   } catch (error) {
-    logger.error('❌ Failed to send admin notification', { userName, userEmail, error });
+    logger.error(' Failed to send admin notification', { userName, userEmail, error });
     // Don't throw - admin notification failure shouldn't block user verification
   }
 };
@@ -385,11 +385,11 @@ export const sendNewOrderNotification = async (): Promise<void> => {
     <body>
       <div class="container">
         <div class="header">
-          <h1 style="margin: 0; font-size: 32px;">🛒 Neue Bestellung!</h1>
+          <h1 style="margin: 0; font-size: 32px;"> Neue Bestellung!</h1>
         </div>
 
         <div class="content">
-          <div class="icon">📦</div>
+          <div class="icon"></div>
 
           <h2 style="color: #FF9800; margin: 20px 0;">Eine neue Bestellung ist eingegangen</h2>
 
@@ -400,7 +400,7 @@ export const sendNewOrderNotification = async (): Promise<void> => {
 
           <div style="text-align: center;">
             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/orders" class="cta-button">
-              📋 Jetzt anmelden und prüfen
+               Jetzt anmelden und prüfen
             </a>
           </div>
 
@@ -423,7 +423,7 @@ export const sendNewOrderNotification = async (): Promise<void> => {
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: adminEmail,
-    subject: '🛒 MEDWEG - Neue Bestellung eingegangen',
+    subject: ' MEDWEG - Neue Bestellung eingegangen',
     html: htmlContent,
   };
 
@@ -432,9 +432,9 @@ export const sendNewOrderNotification = async (): Promise<void> => {
 
     await transporter.sendMail(mailOptions);
 
-    logger.info('✅ Admin order notification sent successfully');
+    logger.info(' Admin order notification sent successfully');
   } catch (error) {
-    logger.error('❌ Failed to send admin order notification', {
+    logger.error(' Failed to send admin order notification', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined
     });
@@ -455,7 +455,7 @@ export const sendOrderApprovedNotification = async (
   }
 ): Promise<void> => {
   // TODO: Implement with Gmail SMTP or keep as mock for now
-  logger.info('📧 Order approved notification', { email, orderDetails });
+  logger.info(' Order approved notification', { email, orderDetails });
 };
 
 /**
@@ -468,7 +468,7 @@ export const sendOrderReminder = async (
   patients: Array<{ name: string; scheduledDate: string }>
 ): Promise<void> => {
   // TODO: Implement with Gmail SMTP or keep as mock for now
-  logger.info('📧 Order reminder', { email, patientsCount: patients.length });
+  logger.info(' Order reminder', { email, patientsCount: patients.length });
 };
 
 /**
@@ -504,13 +504,13 @@ export const sendContactFormNotification = async (
       <div class="container">
         <div class="header">
           <img src="cid:logo" alt="MEDWEG Bavaria Logo" class="logo" />
-          <h1 style="margin: 10px 0 0 0;">📧 Neue Kontaktanfrage</h1>
+          <h1 style="margin: 10px 0 0 0;"> Neue Kontaktanfrage</h1>
           <p style="margin: 5px 0 0 0;">Landing Page Kontaktformular</p>
         </div>
 
         <div class="content">
           <div class="info-box">
-            <h3 style="margin: 0 0 15px 0; color: #009688;">👤 Absenderinformationen:</h3>
+            <h3 style="margin: 0 0 15px 0; color: #009688;"> Absenderinformationen:</h3>
             <div class="contact-details">
               <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
               <p style="margin: 8px 0;"><strong>E-Mail:</strong> <a href="mailto:${email}">${email}</a></p>
@@ -524,13 +524,13 @@ export const sendContactFormNotification = async (
           </div>
 
           <div class="message-box">
-            <h3 style="margin: 0 0 15px 0; color: #009688;">💬 Nachricht:</h3>
+            <h3 style="margin: 0 0 15px 0; color: #009688;"> Nachricht:</h3>
             <p style="white-space: pre-wrap; margin: 0; font-size: 15px; line-height: 1.6;">${message}</p>
           </div>
 
           <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 18px; margin: 20px 0; border-radius: 8px;">
             <p style="margin: 0; color: #1565C0;">
-              <strong>📨 Hinweis:</strong> Eine automatische Bestätigungsmail wurde an ${email} gesendet.
+              <strong> Hinweis:</strong> Eine automatische Bestätigungsmail wurde an ${email} gesendet.
             </p>
           </div>
 
@@ -554,7 +554,7 @@ export const sendContactFormNotification = async (
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
     to: adminEmail,
     replyTo: email, // Allow admin to reply directly to sender
-    subject: `📧 Neue Kontaktanfrage: ${subject}`,
+    subject: ` Neue Kontaktanfrage: ${subject}`,
     html: htmlContent,
     attachments: [
       {
@@ -567,9 +567,9 @@ export const sendContactFormNotification = async (
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Contact form notification sent to admin', { name, email, subject });
+    logger.info(' Contact form notification sent to admin', { name, email, subject });
   } catch (error) {
-    logger.error('❌ Failed to send contact form notification', { name, email, error });
+    logger.error(' Failed to send contact form notification', { name, email, error });
     throw error; // Throw error so contact form submission fails if email can't be sent
   }
 };
@@ -613,7 +613,7 @@ export const sendContactFormAutoReply = async (
 
           <div class="success-box">
             <p style="margin: 0; font-size: 15px; color: #2e7d32;">
-              <strong>✓ Ihre Nachricht wurde erfolgreich übermittelt!</strong>
+              <strong> Ihre Nachricht wurde erfolgreich übermittelt!</strong>
             </p>
           </div>
 
@@ -623,22 +623,22 @@ export const sendContactFormAutoReply = async (
           </p>
 
           <div class="info-box">
-            <h3 style="margin: 0 0 15px 0; color: #009688;">⏱️ Was passiert als Nächstes?</h3>
+            <h3 style="margin: 0 0 15px 0; color: #009688;">⏱ Was passiert als Nächstes?</h3>
             <p style="margin: 8px 0; font-size: 14px;">
-              ✓ Unser Team prüft Ihre Anfrage<br>
-              ✓ Sie erhalten in der Regel innerhalb von <strong>24 Stunden</strong> eine Antwort<br>
-              ✓ Bei dringenden Anliegen kontaktieren Sie uns bitte telefonisch
+               Unser Team prüft Ihre Anfrage<br>
+               Sie erhalten in der Regel innerhalb von <strong>24 Stunden</strong> eine Antwort<br>
+               Bei dringenden Anliegen kontaktieren Sie uns bitte telefonisch
             </p>
           </div>
 
           <div class="contact-info">
-            <h3 style="margin: 0 0 15px 0; color: #009688;">📞 Kontaktinformationen:</h3>
+            <h3 style="margin: 0 0 15px 0; color: #009688;"> Kontaktinformationen:</h3>
             <p style="margin: 8px 0; font-size: 14px;">
               <strong>MEDWEG Bavaria GmbH</strong><br>
-              📍 Augsburg, Deutschland<br>
-              📧 E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688;">service.medwegbavaria@gmail.com</a><br>
-              📞 Telefon: +49 821 1234 5678<br>
-              🕐 Öffnungszeiten: Mo-Fr, 9:00-18:00 Uhr
+               Augsburg, Deutschland<br>
+               E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688;">service.medwegbavaria@gmail.com</a><br>
+               Telefon: +49 821 1234 5678<br>
+               Öffnungszeiten: Mo-Fr, 9:00-18:00 Uhr
             </p>
           </div>
 
@@ -682,9 +682,9 @@ export const sendContactFormAutoReply = async (
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Contact form auto-reply sent', { name, email });
+    logger.info(' Contact form auto-reply sent', { name, email });
   } catch (error) {
-    logger.error('❌ Failed to send contact form auto-reply', { name, email, error });
+    logger.error(' Failed to send contact form auto-reply', { name, email, error });
     // Don't throw - auto-reply failure shouldn't block the main notification
   }
 };

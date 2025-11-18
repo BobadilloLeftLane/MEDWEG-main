@@ -35,10 +35,10 @@ export const testConnection = async (): Promise<boolean> => {
     const result = await client.query('SELECT NOW()');
     client.release();
 
-    console.log('✅ Database connected successfully at:', result.rows[0].now);
+    console.log(' Database connected successfully at:', result.rows[0].now);
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error(' Database connection failed:', error);
     return false;
   }
 };
@@ -54,12 +54,12 @@ export const query = async (text: string, params?: any[]) => {
 
     // Log query u development mode
     if (process.env.NODE_ENV === 'development') {
-      console.log('📊 Query executed:', { text, duration, rows: result.rowCount });
+      console.log(' Query executed:', { text, duration, rows: result.rowCount });
     }
 
     return result;
   } catch (error) {
-    console.error('❌ Query error:', { text, error });
+    console.error(' Query error:', { text, error });
     throw error;
   }
 };
@@ -69,7 +69,7 @@ export const query = async (text: string, params?: any[]) => {
  */
 export const closePool = async (): Promise<void> => {
   await pool.end();
-  console.log('🔌 Database pool closed');
+  console.log(' Database pool closed');
 };
 
 // Handle process termination

@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
+// import rateLimit from 'express-rate-limit'; // Temporarily disabled
 import { testConnection } from './config/database';
 import logger from './utils/logger';
 
@@ -29,9 +29,26 @@ app.set('trust proxy', true);
 app.use(helmet());
 
 // CORS - Cross-Origin Resource Sharing
+// Allow multiple origins: with and without www
+const allowedOrigins = [
+  'https://medwegbavaria.com',
+  'https://www.medwegbavaria.com',
+  'http://localhost:3000', // for local development
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        // Don't throw error, just reject the origin
+        callback(null, false);
+      }
+    },
     credentials: true, // Za HTTP-Only cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -39,15 +56,17 @@ app.use(
 );
 
 // Rate Limiting - Global
-const globalLimiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
-  message: 'Zu viele Anfragen, bitte später erneut versuchen.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// TEMPORARILY DISABLED - causing segfault with trust proxy
+// const globalLimiter = rateLimit({
+//   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 min
+//   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
+//   message: 'Zu viele Anfragen, bitte später erneut versuchen.',
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   validate: false,
+// });
 
-app.use(`/api/${API_VERSION}`, globalLimiter);
+// app.use(`/api/${API_VERSION}`, globalLimiter);
 
 /**
  * Body Parsing Middleware
@@ -74,10 +93,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use((req: Request, _res: Response, next: NextFunction) => {
     logger.debug(`${req.method} ${req.path}`);
     if (req.path.includes('/orders') && req.method === 'POST') {
-      console.log('📅 RAW REQUEST BODY in app.ts middleware:', req.body);
-      console.log('📅 req.body type:', typeof req.body);
-      console.log('📅 req.body.scheduled_date:', req.body.scheduled_date);
-      console.log('📅 JSON.stringify(req.body):', JSON.stringify(req.body, null, 2));
+      console.log('RAW REQUEST BODY in app.ts middleware:', req.body);
+      console.log('req.body type:', typeof req.body);
+      console.log('req.body.scheduled_date:', req.body.scheduled_date);
+      console.log('JSON.stringify(req.body):', JSON.stringify(req.body, null, 2));
     }
     next();
   });
@@ -193,12 +212,12 @@ const startServer = async () => {
 
     // Start Express server
     app.listen(PORT, () => {
-      logger.info(`🚀 MEDWEG Backend API started successfully`);
-      logger.info(`📍 Server running on: http://localhost:${PORT}`);
-      logger.info(`📡 API Base URL: http://localhost:${PORT}/api/${API_VERSION}`);
-      logger.info(`🗄️  Database: ${process.env.DB_NAME}@${process.env.DB_HOST}`);
-      logger.info(`🌍 Environment: ${process.env.NODE_ENV}`);
-      logger.info(`📊 Health Check: http://localhost:${PORT}/health`);
+      logger.info(`MEDWEG Backend API started successfully`);
+      logger.info(`Server running on: http://localhost:${PORT}`);
+      logger.info(`API Base URL: http://localhost:${PORT}/api/${API_VERSION}`);
+      logger.info(`Database: ${process.env.DB_NAME}@${process.env.DB_HOST}`);
+      logger.info(`Environment: ${process.env.NODE_ENV}`);
+      logger.info(`Health Check: http://localhost:${PORT}/health`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

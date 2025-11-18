@@ -10,7 +10,7 @@ async function fixRecurringOrderPrices() {
   try {
     await client.query('BEGIN');
 
-    console.log('🔧 Fixing recurring order prices...\n');
+    console.log(' Fixing recurring order prices...\n');
 
     // Get all recurring orders
     const ordersResult = await client.query(
@@ -54,11 +54,11 @@ async function fixRecurringOrderPrices() {
     }
 
     await client.query('COMMIT');
-    console.log('✅ All recurring order prices fixed successfully!');
+    console.log(' All recurring order prices fixed successfully!');
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Error fixing prices:', error);
+    console.error(' Error fixing prices:', error);
     throw error;
   } finally {
     client.release();

@@ -83,7 +83,7 @@ const seedPatients = async () => {
   const client = await pool.connect();
 
   try {
-    console.log('🌱 Starting patient seeding...\n');
+    console.log(' Starting patient seeding...\n');
 
     await client.query('BEGIN');
 
@@ -93,7 +93,7 @@ const seedPatients = async () => {
     );
 
     const institutions = institutionsResult.rows;
-    console.log(`📋 Found ${institutions.length} institutions\n`);
+    console.log(` Found ${institutions.length} institutions\n`);
 
     let totalPatients = 0;
 
@@ -151,20 +151,20 @@ const seedPatients = async () => {
           totalPatients++;
 
         } catch (error: any) {
-          console.error(`  ❌ Error creating patient for ${institution.name}:`, error.message);
+          console.error(`   Error creating patient for ${institution.name}:`, error.message);
         }
       }
 
-      console.log(`  ✅ ${institution.name}: ${createdCount}/${patientCount} patients`);
+      console.log(`   ${institution.name}: ${createdCount}/${patientCount} patients`);
     }
 
     await client.query('COMMIT');
 
-    console.log(`\n✨ Successfully created ${totalPatients} patients across ${institutions.length} institutions!`);
-    console.log(`\n📊 Average: ${Math.round(totalPatients / institutions.length)} patients per institution`);
+    console.log(`\n Successfully created ${totalPatients} patients across ${institutions.length} institutions!`);
+    console.log(`\n Average: ${Math.round(totalPatients / institutions.length)} patients per institution`);
 
     // Show some examples
-    console.log('\n📋 Example patients (decrypted):');
+    console.log('\n Example patients (decrypted):');
     const examplesResult = await client.query(
       `SELECT p.first_name, p.last_name, p.date_of_birth, i.name as institution_name
        FROM patients p
@@ -186,7 +186,7 @@ const seedPatients = async () => {
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('❌ Error seeding patients:', error);
+    console.error(' Error seeding patients:', error);
     throw error;
   } finally {
     client.release();
@@ -197,10 +197,10 @@ const seedPatients = async () => {
 // Run the script
 seedPatients()
   .then(() => {
-    console.log('\n✅ Patient seeding completed successfully!');
+    console.log('\n Patient seeding completed successfully!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Patient seeding failed:', error);
+    console.error(' Patient seeding failed:', error);
     process.exit(1);
   });
