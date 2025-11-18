@@ -193,7 +193,7 @@ const LandingPage = () => {
               px: { xs: 2, sm: 0 },
             }}
           >
-            Ihr zuverlässiger Partner für hochwertige medizinische Versorgung in ganz Deutschland
+            Ihr zuverlässiger Partner für hochwertige medizinische Einwegprodukte in ganz Deutschland
           </Typography>
         </Container>
       </Box>
@@ -882,7 +882,7 @@ const LandingPage = () => {
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, fontSize: '1.05rem' }}>
                     Mit langjähriger Erfahrung in der <strong>Pflegebranche</strong> bringt Iles Papp umfassende Kenntnisse
-                    und praktische Expertise in die MEDWEG GmbH ein. Als erfahrener Geschäftsführer hat er erfolgreich
+                    und praktische Expertise in die MedWeg Bavaria ein. Als erfahrener Geschäftsführer hat er erfolgreich
                     sein eigenes Unternehmen in Deutschland geleitet:
                   </Typography>
                   <Paper elevation={2} sx={{ p: 3, mb: 2, bgcolor: 'primary.50', borderLeft: '4px solid', borderColor: 'primary.main' }}>
@@ -1183,8 +1183,8 @@ const LandingPage = () => {
             <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
               <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
                 <strong>Stadt:</strong> Augsburg, Bayern<br />
-                <strong>E-Mail:</strong> info@medweg.de<br />
-                <strong>Telefon:</strong> +49 821 1234 5678<br />
+                <strong>E-Mail:</strong> medwegbavaria@gmail.com<br />
+                <strong>Telefon:</strong> +4915238941718<br />
                 <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
               </Typography>
             </Box>
@@ -1239,8 +1239,8 @@ const LandingPage = () => {
               <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
                 <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
                   <strong>Stadt:</strong> Augsburg, Bayern<br />
-                  <strong>E-Mail:</strong> info@medweg.de<br />
-                  <strong>Telefon:</strong> +49 821 1234 5678<br />
+                  <strong>E-Mail:</strong> medwegbavaria@gmail.com<br />
+                  <strong>Telefon:</strong> +4915238941718<br />
                   <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
                 </Typography>
               </Box>

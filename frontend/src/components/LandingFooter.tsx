@@ -52,19 +52,19 @@ const LandingFooter = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <EmailIcon sx={{ fontSize: 20, color: 'grey.400' }} />
                 <Link
-                  href="mailto:info@medweg.de"
+                  href="mailto:medwegbavaria@gmail.com"
                   sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                 >
-                  info@medweg.de
+                  medwegbavaria@gmail.com
                 </Link>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PhoneIcon sx={{ fontSize: 20, color: 'grey.400' }} />
                 <Link
-                  href="tel:+4982112345678"
+                  href="tel:+4915238941718"
                   sx={{ color: 'grey.400', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                 >
-                  +49 821 1234 5678
+                  +4915238941718
                 </Link>
               </Box>
             </Box>
