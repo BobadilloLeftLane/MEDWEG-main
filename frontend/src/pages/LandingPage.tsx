@@ -157,7 +157,7 @@ const LandingPage = () => {
                 mb: 1,
               }}
             >
-              MEDWEG
+              MedWeg
             </Typography>
             <Typography
               variant="h3"
@@ -237,7 +237,7 @@ const LandingPage = () => {
         {/* Main Content */}
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, py: { xs: 4, md: 8 }, px: { xs: 2, sm: 3 } }}>
 
-        {/* 1. Warum MEDWEG Section - ERSTE SEKCIJA */}
+        {/* 1. Warum MedWeg Bavaria Section - ERSTE SEKCIJA */}
         <Box
           id="warum-medweg"
           sx={{
@@ -254,7 +254,7 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Warum MEDWEG wählen?
+            Warum MedWeg Bavaria wählen?
           </Typography>
           <Typography
             variant="body1"
@@ -674,7 +674,7 @@ const LandingPage = () => {
             variant="body1"
             sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: { xs: 3, md: 4 }, color: 'white', px: { xs: 1, sm: 0 } }}
           >
-            <strong>MEDWEG</strong> ist Ihr zuverlässiger Partner für medizinische Versorgung mit Sitz in <strong>Augsburg, Deutschland</strong>.
+            <strong>MedWeg Bavaria</strong> ist Ihr zuverlässiger Partner für medizinische Versorgung mit Sitz in <strong>Augsburg, Deutschland</strong>.
             Wir spezialisieren uns auf den Vertrieb hochwertiger medizinischer Produkte für <strong>Unternehmen</strong> und <strong>Privatpersonen</strong>.
           </Typography>
           <Typography
@@ -895,7 +895,7 @@ const LandingPage = () => {
                   </Paper>
                   <Typography variant="body1" sx={{ lineHeight: 1.8, fontSize: '1.05rem' }}>
                     Seine tiefe Branchenkenntnis und sein Engagement für Qualität machen ihn zum idealen Ansprechpartner
-                    für alle Fragen rund um medizinische Versorgungsprodukte. Bei MEDWEG steht <strong>Kundenservice,
+                    für alle Fragen rund um medizinische Versorgungsprodukte. Bei MedWeg Bavaria steht <strong>Kundenservice,
                     Zuverlässigkeit und höchste Qualitätsstandards</strong> an erster Stelle.
                   </Typography>
                 </Grid>
@@ -1128,7 +1128,7 @@ const LandingPage = () => {
             }}
           >
             <iframe
-              title="MEDWEG Standort Augsburg"
+              title="MedWeg Bavaria Standort Augsburg"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d42647.36896864454!2d10.868687749999999!3d48.3705437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479ea1d4e5fb7c15%3A0x41d8a1f0c1c0720!2sAugsburg%2C%20Deutschland!5e0!3m2!1sde!2sde!4v1234567890"
               width="100%"
               height="100%"
@@ -1173,7 +1173,7 @@ const LandingPage = () => {
               <LocationOnIcon sx={{ fontSize: 45, color: 'error.main' }} />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  MEDWEG
+                  MedWeg Bavaria
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   Augsburg, Deutschland
@@ -1229,7 +1229,7 @@ const LandingPage = () => {
                 <LocationOnIcon sx={{ fontSize: 35, color: 'error.main' }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    MEDWEG
+                    MedWeg Bavaria
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Augsburg, Deutschland
@@ -1263,7 +1263,7 @@ const LandingPage = () => {
                 }}
               >
                 <iframe
-                  title="MEDWEG Standort Augsburg Mobile"
+                  title="MedWeg Bavaria Standort Augsburg Mobile"
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d42647.36896864454!2d10.868687749999999!3d48.3705437!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479ea1d4e5fb7c15%3A0x41d8a1f0c1c0720!2sAugsburg%2C%20Deutschland!5e0!3m2!1sde!2sde!4v1234567890"
                   width="100%"
                   height="100%"

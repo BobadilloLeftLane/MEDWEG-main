@@ -17,7 +17,7 @@ const LandingHeader = () => {
   };
 
   const navLinks = [
-    { label: 'Warum MEDWEG', id: 'warum-medweg' },
+    { label: 'Warum MedWeg Bavaria', id: 'warum-medweg' },
     { label: 'Wie funktioniert es', id: 'wie-funktioniert' },
     { label: 'Über uns', id: 'ueber-uns' },
     { label: 'Kontakt', id: 'kontakt' },
@@ -45,7 +45,7 @@ const LandingHeader = () => {
               <Box
                 component="img"
                 src="/medwegbavaria_logo.jpg"
-                alt="MEDWEG Logo"
+                alt="MedWeg Bavaria Logo"
                 sx={{
                   height: { xs: 45, sm: 50, md: 60 },
                   cursor: 'pointer',

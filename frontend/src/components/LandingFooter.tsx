@@ -23,7 +23,7 @@ const LandingFooter = () => {
               <Box
                 component="img"
                 src="/medwegbavaria_logo.jpg"
-                alt="MEDWEG Logo"
+                alt="MedWeg Bavaria Logo"
                 sx={{
                   height: 80,
                   objectFit: 'contain',
@@ -94,7 +94,7 @@ const LandingFooter = () => {
         {/* Copyright */}
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" sx={{ color: 'grey.500' }}>
-            © {new Date().getFullYear()} MEDWEG. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} MedWeg Bavaria. Alle Rechte vorbehalten.
           </Typography>
         </Box>
 
