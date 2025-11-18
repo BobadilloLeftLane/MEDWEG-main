@@ -9,7 +9,7 @@ frontend:
       commands:
         - echo "VITE_API_URL=$VITE_API_URL" >> .env
         - echo "VITE_VAPID_PUBLIC_KEY=$VITE_VAPID_PUBLIC_KEY" >> .env
-        - npm run build
+        - npx vite build
   artifacts:
     baseDirectory: frontend/dist
     files:
