@@ -22,21 +22,16 @@ const API_VERSION = process.env.API_VERSION || 'v1';
  * Security Middleware
  */
 
+// Trust proxy - Required for ALB (Application Load Balancer)
+app.set('trust proxy', true);
+
 // Helmet - Security headers
 app.use(helmet());
 
 // CORS - Cross-Origin Resource Sharing
-// Support multiple origins: production domains and localhost for development
-const allowedOrigins = [
-  'https://medwegbavaria.com',
-  'https://www.medwegbavaria.com',
-  'http://localhost:3000',
-  'http://localhost:5173',
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true, // Za HTTP-Only cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
