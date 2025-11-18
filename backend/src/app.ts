@@ -26,8 +26,8 @@ const API_VERSION = process.env.API_VERSION || 'v1';
 app.use(helmet());
 
 // CORS - Cross-Origin Resource Sharing
+// Support multiple origins: production domains and localhost for development
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
   'https://medwegbavaria.com',
   'https://www.medwegbavaria.com',
   'http://localhost:3000',
@@ -36,17 +36,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: allowedOrigins,
     credentials: true, // Za HTTP-Only cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
