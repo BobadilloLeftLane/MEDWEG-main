@@ -17,14 +17,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify SMTP connection on startup
-transporter.verify((error) => {
-  if (error) {
-    logger.error(' Email service configuration error:', error);
-  } else {
-    logger.info(' Email service ready (Gmail SMTP)');
-  }
-});
+// Verify SMTP connection on startup (wrapped in try-catch to prevent crashes)
+try {
+  transporter.verify((error) => {
+    if (error) {
+      logger.error('⚠️ Email service configuration error (non-blocking):', error.message);
+      logger.warn('Email notifications will not work until credentials are fixed');
+    } else {
+      logger.info('✅ Email service ready (Gmail SMTP)');
+    }
+  });
+} catch (error: any) {
+  logger.error('⚠️ Email service initialization failed (non-blocking):', error.message);
+  logger.warn('Continuing without email service - app functionality not affected');
+}
 
 /**
  * Send Verification Email (6-digit code)
