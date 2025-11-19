@@ -84,6 +84,7 @@ export interface Institution {
   address_street: Buffer; // Enkriptovano
   address_plz: string;
   address_city: string;
+  phone?: string;
   is_verified: boolean;
   is_active: boolean;
   created_at: Date;
@@ -211,6 +212,7 @@ export interface RegisterDto {
   addressStreet: string;
   addressPlz: string;
   addressCity: string;
+  phone: string;
 }
 
 export interface VerifyEmailDto {

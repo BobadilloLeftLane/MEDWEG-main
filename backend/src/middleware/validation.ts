@@ -62,6 +62,10 @@ export const registerSchema = Joi.object({
     'string.min': 'Stadt muss mindestens 2 Zeichen lang sein',
     'any.required': 'Stadt ist erforderlich',
   }),
+  phone: Joi.string().min(7).max(20).required().messages({
+    'string.min': 'Telefonnummer muss mindestens 7 Zeichen lang sein',
+    'any.required': 'Telefonnummer ist erforderlich',
+  }),
 });
 
 // Verify email schema

@@ -68,6 +68,7 @@ export const register = async (data: RegisterDto): Promise<{ message: string; em
     address_street: encryptedStreet,
     address_plz: data.addressPlz,
     address_city: data.addressCity,
+    phone: data.phone,
   });
 
   logger.info('Institution created', { institutionId: institution.id, name: institution.name });

@@ -17,20 +17,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify SMTP connection on startup (wrapped in try-catch to prevent crashes)
-try {
-  transporter.verify((error) => {
-    if (error) {
-      logger.error('⚠️ Email service configuration error (non-blocking):', error.message);
-      logger.warn('Email notifications will not work until credentials are fixed');
-    } else {
-      logger.info('✅ Email service ready (Gmail SMTP)');
-    }
-  });
-} catch (error: any) {
-  logger.error('⚠️ Email service initialization failed (non-blocking):', error.message);
-  logger.warn('Continuing without email service - app functionality not affected');
-}
+// SMTP verification DISABLED to prevent SEGFAULT crashes
+// The transporter.verify() call was causing exit code 139 (SEGFAULT) in production
+// Email service will still work for sending emails, we just skip the startup verification
+logger.warn('[EMAIL] SMTP verification disabled - email service may not work if credentials are invalid');
+logger.info('[EMAIL] Email service initialized (verification skipped)');
 
 /**
  * Send Verification Email (6-digit code)
@@ -640,10 +631,10 @@ export const sendContactFormAutoReply = async (
           <div class="contact-info">
             <h3 style="margin: 0 0 15px 0; color: #009688;"> Kontaktinformationen:</h3>
             <p style="margin: 8px 0; font-size: 14px;">
-              <strong>MEDWEG Bavaria GmbH</strong><br>
-               Augsburg, Deutschland<br>
-               E-Mail: <a href="mailto:service.medwegbavaria@gmail.com" style="color: #009688;">service.medwegbavaria@gmail.com</a><br>
-               Telefon: +49 821 1234 5678<br>
+              <strong>MedWeg Bavaria</strong><br>
+               Augsburg, Bayern<br>
+               E-Mail: <a href="mailto:medwegbavaria@gmail.com" style="color: #009688;">medwegbavaria@gmail.com</a><br>
+               Telefon: +4915238941718<br>
                Öffnungszeiten: Mo-Fr, 9:00-18:00 Uhr
             </p>
           </div>

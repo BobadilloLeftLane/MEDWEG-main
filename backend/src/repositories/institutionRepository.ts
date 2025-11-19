@@ -14,17 +14,19 @@ export const createInstitution = async (institutionData: {
   address_street: Buffer; // Enkriptovano
   address_plz: string;
   address_city: string;
+  phone?: string;
 }): Promise<Institution> => {
   const result = await pool.query(
     `INSERT INTO institutions
-    (name, address_street, address_plz, address_city, is_verified, is_active)
-    VALUES ($1, $2, $3, $4, false, true)
+    (name, address_street, address_plz, address_city, phone, is_verified, is_active)
+    VALUES ($1, $2, $3, $4, $5, false, true)
     RETURNING *`,
     [
       institutionData.name,
       institutionData.address_street,
       institutionData.address_plz,
       institutionData.address_city,
+      institutionData.phone || null,
     ]
   );
 

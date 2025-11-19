@@ -63,6 +63,7 @@ export interface RegisterRequest {
   institutionName: string;
   email: string;
   password: string;
+  confirmPassword: string;
   addressStreet: string;
   addressPlz: string;
   addressCity: string;

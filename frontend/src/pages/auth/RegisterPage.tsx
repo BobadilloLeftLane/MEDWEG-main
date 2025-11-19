@@ -34,10 +34,10 @@ const registerSchema = z
       .email('Ungültige E-Mail-Adresse'),
     password: z
       .string()
-      .min(6, 'Passwort muss mindestens 6 Zeichen lang sein')
+      .min(8, 'Passwort muss mindestens 8 Zeichen lang sein')
       .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        'Passwort muss Groß- und Kleinbuchstaben sowie Zahlen enthalten'
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])/,
+        'Passwort muss Groß- und Kleinbuchstaben, Zahlen und ein Sonderzeichen enthalten'
       ),
     confirmPassword: z.string(),
     addressStreet: z.string().min(3, 'Straße ist erforderlich'),

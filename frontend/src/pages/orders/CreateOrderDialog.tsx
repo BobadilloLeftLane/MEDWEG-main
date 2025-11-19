@@ -19,6 +19,11 @@ import {
   Autocomplete,
   Alert,
   Chip,
+  Card,
+  CardContent,
+  useMediaQuery,
+  useTheme,
+  Divider,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -48,6 +53,9 @@ interface CreateOrderDialogProps {
 }
 
 const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateOrderDialogProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const [products, setProducts] = useState<productApi.Product[]>([]);
   const [patients, setPatients] = useState<patientApi.Patient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -264,8 +272,15 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
 
           {/* Order Items */}
           <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 1
+            }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, width: { xs: '100%', sm: 'auto' } }}>
                 Produkte
               </Typography>
               <Button
@@ -273,26 +288,34 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
                 onClick={handleAddItem}
                 size="small"
                 variant="outlined"
+                fullWidth={isMobile}
               >
                 Produkt hinzufügen
               </Button>
             </Box>
 
-            <TableContainer component={Paper} variant="outlined">
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell><strong>Produkt</strong></TableCell>
-                    <TableCell width="120"><strong>Menge</strong></TableCell>
-                    <TableCell width="120"><strong>Preis/Einheit</strong></TableCell>
-                    <TableCell width="120"><strong>Gesamt</strong></TableCell>
-                    <TableCell width="80" align="center"><strong>Aktion</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orderItems.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
+            {isMobile ? (
+              // Mobile View: Cards
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {orderItems.map((item, index) => (
+                  <Card key={index} variant="outlined" sx={{ position: 'relative' }}>
+                    <CardContent>
+                      {/* Delete Button - Top Right */}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveItem(index)}
+                        disabled={orderItems.length === 1}
+                        color="error"
+                        sx={{ position: 'absolute', top: 8, right: 8 }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+
+                      {/* Product Selection */}
+                      <Box sx={{ mb: 2, pr: 4 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                          Produkt
+                        </Typography>
                         <Autocomplete
                           options={products}
                           value={item.product}
@@ -315,13 +338,21 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
                             <TextField {...params} placeholder="Produkt wählen..." size="small" />
                           )}
                         />
-                      </TableCell>
-                      <TableCell>
+                      </Box>
+
+                      <Divider sx={{ mb: 2 }} />
+
+                      {/* Quantity */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                          Menge
+                        </Typography>
                         <TextField
                           type="number"
                           value={item.quantity}
                           onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 1)}
                           size="small"
+                          fullWidth
                           inputProps={{ min: 1 }}
                           helperText={
                             item.product && item.quantity < item.product.min_order_quantity
@@ -330,11 +361,23 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
                           }
                           error={!!(item.product && item.quantity < item.product.min_order_quantity)}
                         />
-                      </TableCell>
-                      <TableCell>
-                        {item.product ? `€${Number(item.product.price_per_unit).toFixed(2)}` : '-'}
-                      </TableCell>
-                      <TableCell>
+                      </Box>
+
+                      {/* Price Info */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Preis/Einheit:
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {item.product ? `€${Number(item.product.price_per_unit).toFixed(2)}` : '-'}
+                        </Typography>
+                      </Box>
+
+                      {/* Total */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Gesamt:
+                        </Typography>
                         <Chip
                           label={
                             item.product
@@ -344,22 +387,96 @@ const CreateOrderDialog = ({ open, onClose, onSuccess, fixedPatientId }: CreateO
                           color="primary"
                           size="small"
                         />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveItem(index)}
-                          disabled={orderItems.length === 1}
-                          color="error"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            ) : (
+              // Desktop View: Table
+              <TableContainer component={Paper} variant="outlined">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell><strong>Produkt</strong></TableCell>
+                      <TableCell width="120"><strong>Menge</strong></TableCell>
+                      <TableCell width="120"><strong>Preis/Einheit</strong></TableCell>
+                      <TableCell width="120"><strong>Gesamt</strong></TableCell>
+                      <TableCell width="80" align="center"><strong>Aktion</strong></TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {orderItems.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Autocomplete
+                            options={products}
+                            value={item.product}
+                            onChange={(_, newValue) => handleProductChange(index, newValue)}
+                            getOptionLabel={(option) => option.name_de}
+                            renderOption={(props, option) => {
+                              const { key, ...otherProps } = props;
+                              return (
+                                <Box component="li" key={key} {...otherProps}>
+                                  <Box>
+                                    <Typography variant="body2">{option.name_de}</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {option.size} - Min: {option.min_order_quantity}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="Produkt wählen..." size="small" />
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <TextField
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 1)}
+                            size="small"
+                            inputProps={{ min: 1 }}
+                            helperText={
+                              item.product && item.quantity < item.product.min_order_quantity
+                                ? `Min: ${item.product.min_order_quantity}`
+                                : ''
+                            }
+                            error={!!(item.product && item.quantity < item.product.min_order_quantity)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {item.product ? `€${Number(item.product.price_per_unit).toFixed(2)}` : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={
+                              item.product
+                                ? `€${(Number(item.product.price_per_unit) * item.quantity).toFixed(2)}`
+                                : '-'
+                            }
+                            color="primary"
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRemoveItem(index)}
+                            disabled={orderItems.length === 1}
+                            color="error"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
           </Box>
 
           {/* Total */}
