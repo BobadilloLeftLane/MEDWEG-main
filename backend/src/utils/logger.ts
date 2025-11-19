@@ -47,20 +47,23 @@ const logger = winston.createLogger({
 });
 
 /**
- * Console logging u development mode
+ * Console logging for CloudWatch (always enabled for Docker/ECS)
+ * CloudWatch reads from stdout/stderr, so we need Console transport in production
  */
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `[${timestamp}] ${level}: ${message}`;
-        })
-      ),
-    })
-  );
-}
+logger.add(
+  new winston.transports.Console({
+    format: winston.format.combine(
+      // Colorize only in development (CloudWatch doesn't need colors)
+      process.env.NODE_ENV !== 'production' ? winston.format.colorize() : winston.format.uncolorize(),
+      winston.format.printf(({ timestamp, level, message, stack }) => {
+        if (stack) {
+          return `[${timestamp}] ${level}: ${message}\n${stack}`;
+        }
+        return `[${timestamp}] ${level}: ${message}`;
+      })
+    ),
+  })
+);
 
 /**
  * Helper methods

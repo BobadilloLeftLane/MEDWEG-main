@@ -15,7 +15,7 @@ dotenv.config();
  * Express Application Setup
  */
 const app: Application = express();
-const PORT = process.env.PORT || 8080;
+const PORT = parseInt(process.env.PORT || '8080', 10);
 const API_VERSION = process.env.API_VERSION || 'v1';
 
 /**
@@ -163,7 +163,7 @@ import warehouseRoutes from './routes/warehouse.routes';
 import recurringOrderRoutes from './routes/recurringOrder.routes';
 import contactRoutes from './routes/contact.routes';
 import { errorHandler } from './middleware/errorHandler';
-import { startScheduledJobs } from './services/scheduledOrderService';
+// import { startScheduledJobs } from './services/scheduledOrderService'; // TEMPORARILY DISABLED - causing SEGFAULT
 
 // Use routes
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
@@ -208,16 +208,35 @@ const startServer = async () => {
     }
 
     // Start scheduled jobs for automatic order creation
-    startScheduledJobs();
+    // TEMPORARILY DISABLED - node-cron causing SEGFAULT in Docker/ECS
+    // startScheduledJobs();
 
     // Start Express server
-    app.listen(PORT, () => {
+    console.log(`[DEBUG] About to call app.listen on port ${PORT}...`);
+    const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`MEDWEG Backend API started successfully`);
-      logger.info(`Server running on: http://localhost:${PORT}`);
-      logger.info(`API Base URL: http://localhost:${PORT}/api/${API_VERSION}`);
+      logger.info(`Server running on: http://0.0.0.0:${PORT}`);
+      logger.info(`API Base URL: http://0.0.0.0:${PORT}/api/${API_VERSION}`);
       logger.info(`Database: ${process.env.DB_NAME}@${process.env.DB_HOST}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
-      logger.info(`Health Check: http://localhost:${PORT}/health`);
+      logger.info(`Health Check: http://0.0.0.0:${PORT}/health`);
+    });
+
+    // Handle server errors explicitly
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use`);
+      } else if (error.code === 'EACCES') {
+        logger.error(`Permission denied to bind to port ${PORT}`);
+      } else {
+        logger.error(`Server error: ${error.message}`, error);
+      }
+      console.error('[FATAL] Server failed to start:', error);
+      process.exit(1);
+    });
+
+    server.on('listening', () => {
+      console.log(`[DEBUG] Server is now listening on port ${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -226,8 +245,15 @@ const startServer = async () => {
 };
 
 // Start the server
+console.log('[DEBUG] app.ts loaded, require.main:', require.main?.filename);
+console.log('[DEBUG] module:', module.filename);
+console.log('[DEBUG] require.main === module:', require.main === module);
+
 if (require.main === module) {
+  console.log('[DEBUG] Starting server from app.ts...');
   startServer();
+} else {
+  console.log('[DEBUG] app.ts loaded as module, not starting server');
 }
 
 export default app;
