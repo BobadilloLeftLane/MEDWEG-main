@@ -839,18 +839,18 @@ const LandingPage = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      bgcolor: 'grey.100',
+                      bgcolor: '#FFFFFF',
                     }}
                   >
                     <Box
                       component="img"
-                      src="/placeholder-owner.jpg"
-                      alt="Iles Papp"
+                      src="/gf.jpg"
+                      alt="Illes Papp"
                       sx={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
-                        display: 'none',
+                        objectFit: 'contain',
+                        objectPosition: 'center center',
                       }}
                       onError={(e: any) => {
                         e.target.style.display = 'none';
@@ -859,7 +859,7 @@ const LandingPage = () => {
                     />
                     <Box
                       sx={{
-                        display: 'flex',
+                        display: 'none',
                         alignItems: 'center',
                         justifyContent: 'center',
                         width: '100%',
@@ -870,7 +870,7 @@ const LandingPage = () => {
                     </Box>
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.5 }}>
-                    Iles Papp
+                    Illes Papp
                   </Typography>
                   <Typography variant="subtitle1" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     Geschäftsführer
@@ -881,7 +881,7 @@ const LandingPage = () => {
                     Erfahrung und Expertise
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, fontSize: '1.05rem' }}>
-                    Mit langjähriger Erfahrung in der <strong>Pflegebranche</strong> bringt Iles Papp umfassende Kenntnisse
+                    Mit langjähriger Erfahrung in der <strong>Pflegebranche</strong> bringt Illes Papp umfassende Kenntnisse
                     und praktische Expertise in die MedWeg Bavaria ein. Als erfahrener Geschäftsführer hat er erfolgreich
                     sein eigenes Unternehmen in Deutschland geleitet:
                   </Typography>
