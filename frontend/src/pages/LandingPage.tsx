@@ -816,14 +816,10 @@ const LandingPage = () => {
                 <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
                   <Box
                     sx={{
-                      width: { xs: 200, sm: 240, md: 280 },
-                      height: { xs: 250, sm: 300, md: 350 },
+                      width: { xs: 152, sm: 192, md: 227 },
+                      height: { xs: 210, sm: 260, md: 330 },
                       mx: 'auto',
                       mb: 2,
-                      boxShadow: 6,
-                      border: '4px solid',
-                      borderColor: 'primary.main',
-                      borderRadius: 4,
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -833,7 +829,7 @@ const LandingPage = () => {
                   >
                     <Box
                       component="img"
-                      src="/gf.jpg"
+                      src="/gf-new.jpg"
                       alt="Illes Papp"
                       sx={{
                         width: '100%',
@@ -872,14 +868,6 @@ const LandingPage = () => {
                   <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, fontSize: '1.05rem' }}>
                     {t.aboutUs.ceo.experienceText}
                   </Typography>
-                  <Paper elevation={2} sx={{ p: 3, mb: 2, bgcolor: 'primary.50', borderLeft: '4px solid', borderColor: 'primary.main' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.dark', mb: 1 }}>
-                      {t.aboutUs.ceo.companyTitle}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
-                      {t.aboutUs.ceo.companyDescription}
-                    </Typography>
-                  </Paper>
                   <Typography variant="body1" sx={{ lineHeight: 1.8, fontSize: '1.05rem' }}>
                     {t.aboutUs.ceo.closingText}
                   </Typography>
@@ -1022,10 +1010,12 @@ const LandingPage = () => {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label={t.contact.form.phone}
+                    label={`${t.contact.form.phone} *`}
                     name="telefon"
+                    type="tel"
                     value={formData.telefon}
                     onChange={handleInputChange}
+                    required
                     variant="outlined"
                   />
                 </Grid>

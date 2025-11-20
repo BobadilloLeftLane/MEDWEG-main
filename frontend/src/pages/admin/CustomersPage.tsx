@@ -124,36 +124,29 @@ const CustomersPage = () => {
     event: React.MouseEvent<HTMLElement>,
     institution: institutionApi.Institution
   ) => {
-    console.log('Menu opened for institution:', institution);
     setAnchorEl(event.currentTarget);
     setSelectedInstitution(institution);
   };
 
   const handleMenuClose = () => {
-    console.log('Menu closed');
     setAnchorEl(null);
     setSelectedInstitution(null);
   };
 
   // Verify institution
   const handleVerifyClick = () => {
-    console.log('Verify clicked, selectedInstitution:', selectedInstitution);
     // Don't close menu or clear selectedInstitution yet - just open the dialog
     setAnchorEl(null); // Close menu but keep selectedInstitution
     setVerifyDialogOpen(true);
   };
 
   const handleVerifyConfirm = async () => {
-    console.log('Verify confirm clicked, selectedInstitution:', selectedInstitution);
     if (!selectedInstitution) {
-      console.log('No selected institution, returning');
       return;
     }
 
     try {
-      console.log('Calling verifyInstitution API for ID:', selectedInstitution.id);
       await institutionApi.verifyInstitution(selectedInstitution.id);
-      console.log('Verification successful');
       toast.success('Kunde erfolgreich verifiziert');
       setVerifyDialogOpen(false);
       setSelectedInstitution(null);
@@ -165,30 +158,24 @@ const CustomersPage = () => {
   };
 
   const handleVerifyCancel = () => {
-    console.log('Verify cancelled');
     setVerifyDialogOpen(false);
     setSelectedInstitution(null);
   };
 
   // Deactivate institution
   const handleDeactivateClick = () => {
-    console.log('Deactivate clicked, selectedInstitution:', selectedInstitution);
     // Don't close menu or clear selectedInstitution yet - just open the dialog
     setAnchorEl(null); // Close menu but keep selectedInstitution
     setDeactivateDialogOpen(true);
   };
 
   const handleDeactivateConfirm = async () => {
-    console.log('Deactivate confirm clicked, selectedInstitution:', selectedInstitution);
     if (!selectedInstitution) {
-      console.log('No selected institution, returning');
       return;
     }
 
     try {
-      console.log('Calling deactivateInstitution API for ID:', selectedInstitution.id);
       await institutionApi.deactivateInstitution(selectedInstitution.id);
-      console.log('Deactivation successful');
       toast.success('Kunde erfolgreich deaktiviert');
       setDeactivateDialogOpen(false);
       setSelectedInstitution(null);
@@ -200,29 +187,23 @@ const CustomersPage = () => {
   };
 
   const handleDeactivateCancel = () => {
-    console.log('Deactivate cancelled');
     setDeactivateDialogOpen(false);
     setSelectedInstitution(null);
   };
 
   // Reactivate institution
   const handleReactivateClick = () => {
-    console.log('Reactivate clicked, selectedInstitution:', selectedInstitution);
     setAnchorEl(null);
     setReactivateDialogOpen(true);
   };
 
   const handleReactivateConfirm = async () => {
-    console.log('Reactivate confirm clicked, selectedInstitution:', selectedInstitution);
     if (!selectedInstitution) {
-      console.log('No selected institution, returning');
       return;
     }
 
     try {
-      console.log('Calling reactivateInstitution API for ID:', selectedInstitution.id);
       await institutionApi.reactivateInstitution(selectedInstitution.id);
-      console.log('Reactivation successful');
       toast.success('Kunde erfolgreich reaktiviert');
       setReactivateDialogOpen(false);
       setSelectedInstitution(null);
@@ -234,29 +215,23 @@ const CustomersPage = () => {
   };
 
   const handleReactivateCancel = () => {
-    console.log('Reactivate cancelled');
     setReactivateDialogOpen(false);
     setSelectedInstitution(null);
   };
 
   // Delete institution
   const handleDeleteClick = () => {
-    console.log('Delete clicked, selectedInstitution:', selectedInstitution);
     setAnchorEl(null);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    console.log('Delete confirm clicked, selectedInstitution:', selectedInstitution);
     if (!selectedInstitution) {
-      console.log('No selected institution, returning');
       return;
     }
 
     try {
-      console.log('Calling deleteInstitution API for ID:', selectedInstitution.id);
       await institutionApi.deleteInstitution(selectedInstitution.id);
-      console.log('Deletion successful');
       toast.success('Kunde erfolgreich gelöscht');
       setDeleteDialogOpen(false);
       setSelectedInstitution(null);
@@ -268,7 +243,6 @@ const CustomersPage = () => {
   };
 
   const handleDeleteCancel = () => {
-    console.log('Delete cancelled');
     setDeleteDialogOpen(false);
     setSelectedInstitution(null);
   };

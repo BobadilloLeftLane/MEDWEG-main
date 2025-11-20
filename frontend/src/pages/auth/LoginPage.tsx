@@ -73,7 +73,6 @@ const LoginPage = () => {
     try {
       // Clear auth state to remove any stale tokens
       clearAuth();
-      console.log('LoginPage: Cleared old auth tokens');
     } catch (error) {
       console.error('Error clearing auth:', error);
     }
@@ -133,7 +132,6 @@ const LoginPage = () => {
 
       if (loginType === 'admin') {
         const adminData = data as AdminLoginFormData;
-        console.log('Admin login attempt:', adminData.email);
 
         // Save password for re-login after verification
         setSavedPassword(adminData.password);
@@ -142,14 +140,8 @@ const LoginPage = () => {
           email: adminData.email,
           password: adminData.password,
         });
-
-        console.log('🔍 Full login response:', response);
-        console.log('🔍 requiresEmailVerification:', response.requiresEmailVerification);
-        console.log('🔍 email:', response.email);
-        console.log('🔍 user:', response.user);
       } else {
         const workerData = data as WorkerLoginFormData;
-        console.log('Worker login attempt:', workerData.username);
         response = await workerLogin({
           username: workerData.username,
           password: workerData.password,
@@ -158,14 +150,11 @@ const LoginPage = () => {
 
       // Check if email verification is required
       if (response.requiresEmailVerification && response.email) {
-        console.log('Email verification required for:', response.email);
         setVerificationEmail(response.email);
         setShowVerificationModal(true);
         setIsLoading(false); // Stop loading since we're showing modal
         return; // ВАЖНО: Ne pokazuj success toast, samo prikaži modal!
       }
-
-      console.log('Login successful:', response.user);
 
       // Set auth state (tokens are in HTTP-Only cookies)
       if (response.user) {

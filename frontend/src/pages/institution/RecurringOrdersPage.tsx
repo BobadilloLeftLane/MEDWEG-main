@@ -86,20 +86,14 @@ const RecurringOrdersPage = () => {
         patientApi.getPatients(),
       ]);
 
-      console.log('📦 Products loaded:', productsData.length);
-      console.log('👥 Patients loaded:', patientsData.length);
-      console.log('👥 Patients data:', patientsData);
-
       setProducts(productsData);
       setPatients(patientsData);
 
       // Load templates separately (might fail if migration not run)
       try {
         const templatesData = await recurringOrderApi.getTemplates();
-        console.log('📋 Templates loaded:', templatesData.length);
         setTemplates(templatesData);
       } catch (templatesError: any) {
-        console.warn('⚠️ Templates API not available yet (migration not run):', templatesError);
         // This is OK - templates API might not exist yet
         setTemplates([]);
       }

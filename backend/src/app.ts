@@ -92,12 +92,6 @@ app.use('/assets', express.static('public/assets'));
 if (process.env.NODE_ENV === 'development') {
   app.use((req: Request, _res: Response, next: NextFunction) => {
     logger.debug(`${req.method} ${req.path}`);
-    if (req.path.includes('/orders') && req.method === 'POST') {
-      console.log('RAW REQUEST BODY in app.ts middleware:', req.body);
-      console.log('req.body type:', typeof req.body);
-      console.log('req.body.scheduled_date:', req.body.scheduled_date);
-      console.log('JSON.stringify(req.body):', JSON.stringify(req.body, null, 2));
-    }
     next();
   });
 }
@@ -231,12 +225,8 @@ const startServer = async () => {
       } else {
         logger.error(`Server error: ${error.message}`, error);
       }
-      console.error('[FATAL] Server failed to start:', error);
+      logger.error('[FATAL] Server failed to start:', error);
       process.exit(1);
-    });
-
-    server.on('listening', () => {
-      console.log(`[DEBUG] Server is now listening on port ${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -245,15 +235,8 @@ const startServer = async () => {
 };
 
 // Start the server
-console.log('[DEBUG] app.ts loaded, require.main:', require.main?.filename);
-console.log('[DEBUG] module:', module.filename);
-console.log('[DEBUG] require.main === module:', require.main === module);
-
 if (require.main === module) {
-  console.log('[DEBUG] Starting server from app.ts...');
   startServer();
-} else {
-  console.log('[DEBUG] app.ts loaded as module, not starting server');
 }
 
 export default app;

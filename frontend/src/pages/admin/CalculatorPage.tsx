@@ -367,17 +367,6 @@ const CalculatorPage = () => {
     let remaining = Number(totalProfit || 0);
     let profit = 0;
 
-    // Debug logging
-    console.log('📊 Progress Calculation:', {
-      totalProfit,
-      warehouseCost,
-      incomingShippingCosts,
-      totalOutgoingShippingCost,
-      totalShippingCosts,
-      totalCosts,
-      remaining
-    });
-
     if (totalCosts === 0) {
       // Nema troškova - sav profit je Gewinn
       profit = remaining;
