@@ -1,12 +1,15 @@
-import { AppBar, Toolbar, Button, Container, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
+import { AppBar, Toolbar, Button, Container, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, Select, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import LanguageIcon from '@mui/icons-material/Language';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LandingHeader = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -17,11 +20,11 @@ const LandingHeader = () => {
   };
 
   const navLinks = [
-    { label: 'Warum MedWeg Bavaria', id: 'warum-medweg' },
-    { label: 'Wie funktioniert es', id: 'wie-funktioniert' },
-    { label: 'Über uns', id: 'ueber-uns' },
-    { label: 'Kontakt', id: 'kontakt' },
-    { label: 'Standort', id: 'standort' },
+    { label: t.header.whyMedweg, id: 'warum-medweg' },
+    { label: t.header.howItWorks, id: 'wie-funktioniert' },
+    { label: t.header.about, id: 'ueber-uns' },
+    { label: t.header.contact, id: 'kontakt' },
+    { label: t.header.location, id: 'standort' },
   ];
 
   const handleLoginClick = () => {
@@ -77,6 +80,35 @@ const LandingHeader = () => {
               ))}
             </Box>
 
+            {/* Language Switcher - Desktop */}
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'de' | 'en')}
+              startAdornment={<LanguageIcon sx={{ mr: 0.5, fontSize: '1.1rem' }} />}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                mr: 2,
+                color: 'white',
+                height: 38,
+                minWidth: 90,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: 'white',
+                },
+              }}
+            >
+              <MenuItem value="de">DE</MenuItem>
+              <MenuItem value="en">EN</MenuItem>
+            </Select>
+
             {/* Desktop Login/Register Button */}
             <Button
               variant="contained"
@@ -96,8 +128,37 @@ const LandingHeader = () => {
                 },
               }}
             >
-              Anmelden / Registrieren
+              {t.header.login}
             </Button>
+
+            {/* Language Switcher - Mobile */}
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'de' | 'en')}
+              sx={{
+                display: { xs: 'flex', md: 'none' },
+                mr: 1,
+                color: 'white',
+                height: 32,
+                minWidth: 70,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: 'white',
+                },
+                '& .MuiSelect-select': {
+                  py: 0.5,
+                  fontSize: '0.85rem',
+                },
+              }}
+            >
+              <MenuItem value="de">DE</MenuItem>
+              <MenuItem value="en">EN</MenuItem>
+            </Select>
 
             {/* Mobile Login/Register Button - Top Right */}
             <Button
@@ -121,7 +182,7 @@ const LandingHeader = () => {
                 },
               }}
             >
-              Anmelden
+              {language === 'de' ? 'Anmelden' : 'Login'}
             </Button>
 
             {/* Mobile Menu Icon */}

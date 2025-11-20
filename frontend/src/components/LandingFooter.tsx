@@ -2,9 +2,11 @@ import { Box, Container, Typography, Grid, Link, Divider } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LandingFooter = () => {
+  const { t } = useLanguage();
+
   return (
     <Box
       component="footer"
@@ -33,20 +35,20 @@ const LandingFooter = () => {
               />
             </Box>
             <Typography variant="body2" sx={{ color: 'grey.400', lineHeight: 1.8 }}>
-              Ihr zuverlässiger Partner für medizinische Versorgung in Augsburg und Umgebung.
+              {t.footer.description}
             </Typography>
           </Grid>
 
           {/* Contact Info */}
           <Grid item xs={12} md={4}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              Kontakt
+              {t.footer.contactInfo}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocationOnIcon sx={{ fontSize: 20, color: 'grey.400' }} />
                 <Typography variant="body2" sx={{ color: 'grey.400' }}>
-                  Augsburg, Deutschland
+                  {t.footer.address}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -73,17 +75,17 @@ const LandingFooter = () => {
           {/* Products */}
           <Grid item xs={12} md={4}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-              Unsere Produkte
+              {t.footer.products}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Typography variant="body2" sx={{ color: 'grey.400' }}>
-                • Einweghandschuhe
+                • {t.aboutUs.products.gloves.title}
               </Typography>
               <Typography variant="body2" sx={{ color: 'grey.400' }}>
-                • Desinfektionsmittel (flüssig)
+                • {t.aboutUs.products.disinfectant.title}
               </Typography>
               <Typography variant="body2" sx={{ color: 'grey.400' }}>
-                • Desinfektionstücher
+                • {t.aboutUs.products.wipes.title}
               </Typography>
             </Box>
           </Grid>
@@ -94,7 +96,7 @@ const LandingFooter = () => {
         {/* Copyright */}
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" sx={{ color: 'grey.500' }}>
-            © {new Date().getFullYear()} MedWeg Bavaria. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} MedWeg Bavaria. {t.footer.copyright}
           </Typography>
         </Box>
 

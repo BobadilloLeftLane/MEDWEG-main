@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import LandingHeader from '../components/LandingHeader';
 import LandingFooter from '../components/LandingFooter';
 import * as contactApi from '../api/contactApi';
+import { useLanguage } from '../contexts/LanguageContext';
 import GlovesIcon from '../assets/icons/GlovesIcon';
 import DisinfectantIcon from '../assets/icons/DisinfectantIcon';
 import WipesIcon from '../assets/icons/WipesIcon';
@@ -24,6 +25,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const LandingPage = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,7 +46,7 @@ const LandingPage = () => {
 
     // Validation
     if (!formData.name || !formData.email || !formData.telefon || !formData.nachricht) {
-      toast.error('Bitte füllen Sie alle Felder aus');
+      toast.error(t.contact.form.errors.allFields);
       return;
     }
 
@@ -59,10 +61,10 @@ const LandingPage = () => {
         message: formData.nachricht,
       });
 
-      toast.success('Vielen Dank! Ihre Nachricht wurde gesendet. Sie erhalten eine Bestätigungsmail.');
+      toast.success(t.contact.form.success);
       setFormData({ name: '', email: '', telefon: '', nachricht: '' });
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Fehler beim Senden der Nachricht');
+      toast.error(error.response?.data?.error || t.contact.form.errors.sendError);
     } finally {
       setIsSubmitting(false);
     }
@@ -70,26 +72,26 @@ const LandingPage = () => {
 
   const userJourneySteps = [
     {
-      label: 'Registrierung',
-      description: 'Erstellen Sie Ihr Konto in wenigen Minuten',
+      label: t.howItWorks.steps.registration.label,
+      description: t.howItWorks.steps.registration.description,
       icon: <PersonAddIcon sx={{ fontSize: 50 }} />,
       color: '#00BCD4',
     },
     {
-      label: 'Anmeldung',
-      description: 'Melden Sie sich sicher an',
+      label: t.howItWorks.steps.login.label,
+      description: t.howItWorks.steps.login.description,
       icon: <LoginIcon sx={{ fontSize: 50 }} />,
       color: '#2e7d32',
     },
     {
-      label: 'Produkte auswählen',
-      description: 'Wählen Sie aus unserem Sortiment',
+      label: t.howItWorks.steps.selectProducts.label,
+      description: t.howItWorks.steps.selectProducts.description,
       icon: <ShoppingCartIcon sx={{ fontSize: 50 }} />,
       color: '#ed6c02',
     },
     {
-      label: 'Bestellung abschließen',
-      description: 'Erhalten Sie Ihre Produkte schnell und zuverlässig',
+      label: t.howItWorks.steps.completeOrder.label,
+      description: t.howItWorks.steps.completeOrder.description,
       icon: <DoneAllIcon sx={{ fontSize: 50 }} />,
       color: '#9c27b0',
     },
@@ -174,7 +176,7 @@ const LandingPage = () => {
                 fontStyle: 'italic',
               }}
             >
-              BAVARIA
+              {t.hero.subtitle}
             </Typography>
           </Box>
           <Typography
@@ -193,7 +195,7 @@ const LandingPage = () => {
               px: { xs: 2, sm: 0 },
             }}
           >
-            Ihr zuverlässiger Partner für hochwertige medizinische Einwegprodukte in ganz Deutschland
+            {t.hero.description}
           </Typography>
         </Container>
       </Box>
@@ -254,13 +256,13 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Warum MedWeg Bavaria wählen?
+            {t.whyMedweg.title}
           </Typography>
           <Typography
             variant="body1"
             sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.1rem' }, maxWidth: '800px', mx: 'auto', px: { xs: 1, sm: 0 } }}
           >
-            Modernste Technologie trifft auf jahrelange Erfahrung in der Pflegebranche
+            {t.whyMedweg.subtitle}
           </Typography>
 
           <Grid container spacing={4}>
@@ -269,11 +271,10 @@ const LandingPage = () => {
                 <CheckCircleIcon sx={{ fontSize: 50, color: 'success.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Höchste Qualität
+                    {t.whyMedweg.quality.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Alle unsere Produkte erfüllen die strengsten medizinischen Standards und
-                    Qualitätsanforderungen. Geprüft und zertifiziert nach EU-Richtlinien.
+                    {t.whyMedweg.quality.description}
                   </Typography>
                 </Box>
               </Box>
@@ -284,11 +285,10 @@ const LandingPage = () => {
                 <LocalShippingIcon sx={{ fontSize: 50, color: 'primary.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Schnelle Lieferung
+                    {t.whyMedweg.delivery.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Zuverlässige und pünktliche Lieferung direkt zu Ihnen. Wir arbeiten mit
-                    renommierten Versandpartnern für maximale Sicherheit und Geschwindigkeit.
+                    {t.whyMedweg.delivery.description}
                   </Typography>
                 </Box>
               </Box>
@@ -299,11 +299,10 @@ const LandingPage = () => {
                 <VerifiedUserIcon sx={{ fontSize: 50, color: 'success.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Zertifizierte Produkte
+                    {t.whyMedweg.certified.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Alle Produkte sind nach EU-Richtlinien zertifiziert und für den medizinischen
-                    Einsatz zugelassen. Qualität, der Sie vertrauen können.
+                    {t.whyMedweg.certified.description}
                   </Typography>
                 </Box>
               </Box>
@@ -314,11 +313,10 @@ const LandingPage = () => {
                 <SupportAgentIcon sx={{ fontSize: 50, color: 'primary.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Persönlicher Service
+                    {t.whyMedweg.service.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Unser kompetentes Team steht Ihnen bei Fragen jederzeit zur Verfügung.
-                    Individuelle Beratung für Ihre spezifischen Bedürfnisse.
+                    {t.whyMedweg.service.description}
                   </Typography>
                 </Box>
               </Box>
@@ -330,11 +328,10 @@ const LandingPage = () => {
                 <AutorenewIcon sx={{ fontSize: 50, color: 'info.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Automatisierte Plattform
+                    {t.whyMedweg.automation.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Vollständig automatisierte Bestellabwicklung für <strong>Pflegedienste, Ambulante</strong> und
-                    <strong> Intensivpflege-Einrichtungen</strong>. Sparen Sie Zeit und reduzieren Sie Fehler durch intelligente Automatisierung.
+                    {t.whyMedweg.automation.description}
                   </Typography>
                 </Box>
               </Box>
@@ -345,11 +342,10 @@ const LandingPage = () => {
                 <BarChartIcon sx={{ fontSize: 50, color: 'warning.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Detaillierte Statistiken & Kontrolle
+                    {t.whyMedweg.statistics.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Behalten Sie den kompletten Überblick: Bestellhistorie, Ausgabenanalyse, Lagerbestände und
-                    Lieferstatistiken. Dashboard mit Echtzeitdaten für optimale Kontrolle Ihres Pflegedienstes.
+                    {t.whyMedweg.statistics.description}
                   </Typography>
                 </Box>
               </Box>
@@ -360,11 +356,10 @@ const LandingPage = () => {
                 <PeopleIcon sx={{ fontSize: 50, color: 'secondary.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Mitarbeiterverwaltung
+                    {t.whyMedweg.staff.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Verwalten Sie Benutzer und Mitarbeiter zentral. Weisen Sie Berechtigungen zu und behalten Sie
-                    die Kontrolle über alle Bestellaktivitäten in Ihrer Einrichtung.
+                    {t.whyMedweg.staff.description}
                   </Typography>
                 </Box>
               </Box>
@@ -375,11 +370,10 @@ const LandingPage = () => {
                 <SettingsIcon sx={{ fontSize: 50, color: 'error.main', mt: 0.5, flexShrink: 0 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Workflow-Kontrolle
+                    {t.whyMedweg.workflow.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Komplette Transparenz und Kontrolle des Bestellprozesses: Von der Anforderung über die
-                    Genehmigung bis zur Lieferung. Ideal für Intensivpflege und ambulante Dienste.
+                    {t.whyMedweg.workflow.description}
                   </Typography>
                 </Box>
               </Box>
@@ -390,13 +384,13 @@ const LandingPage = () => {
           <Box sx={{ mt: 6, textAlign: 'center' }}>
             <Paper elevation={4} sx={{ p: 4, bgcolor: 'primary.50', borderRadius: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.dark', mb: 2 }}>
-                Perfekt für Pflegeeinrichtungen
+                {t.whyMedweg.callToAction.title}
               </Typography>
               <Typography variant="body1" sx={{ color: 'text.secondary', mb: 2 }}>
-                <strong>Pflegedienste</strong> • <strong>Ambulante Pflege</strong> • <strong>Intensivpflege</strong> • <strong>Kliniken</strong>
+                {t.whyMedweg.callToAction.facilities}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                Entwickelt von Pflegeprofis für Pflegeprofis
+                {t.whyMedweg.callToAction.tagline}
               </Typography>
             </Paper>
           </Box>
@@ -420,13 +414,13 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Wie funktioniert es?
+            {t.howItWorks.title}
           </Typography>
           <Typography
             variant="body1"
             sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.1rem' }, px: { xs: 1, sm: 0 } }}
           >
-            Einfach, schnell und benutzerfreundlich – So nutzen Sie unsere Plattform
+            {t.howItWorks.subtitle}
           </Typography>
 
           {/* Desktop Stepper */}
@@ -522,58 +516,58 @@ const LandingPage = () => {
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 4, height: '100%', bgcolor: 'primary.50' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
-                  1. Registrierung
+                  {t.howItWorks.detailedSteps.registration.title}
                 </Typography>
                 <Typography variant="body2" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-                  • Klicken Sie auf "Anmelden / Registrieren"<br />
-                  • Füllen Sie das Registrierungsformular aus<br />
-                  • Bestätigen Sie Ihre E-Mail-Adresse<br />
-                  • Ihr Konto ist bereit!
+                  • {t.howItWorks.detailedSteps.registration.step1}<br />
+                  • {t.howItWorks.detailedSteps.registration.step2}<br />
+                  • {t.howItWorks.detailedSteps.registration.step3}<br />
+                  • {t.howItWorks.detailedSteps.registration.step4}
                 </Typography>
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 4, height: '100%', bgcolor: 'success.50' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'success.main' }}>
-                  2. Anmeldung & Mitarbeiterverwaltung
+                  {t.howItWorks.detailedSteps.loginStaff.title}
                 </Typography>
                 <Typography variant="body2" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-                  • Geben Sie Ihre E-Mail und Passwort ein<br />
-                  • Zugriff auf Ihr persönliches Dashboard<br />
-                  • <strong>Erstellen Sie Mitarbeiterkonten</strong><br />
-                  • <strong>Weisen Sie Berechtigungen zu</strong><br />
-                  • Behalten Sie die Kontrolle über Ihr Profil
+                  • {t.howItWorks.detailedSteps.loginStaff.step1}<br />
+                  • {t.howItWorks.detailedSteps.loginStaff.step2}<br />
+                  • <strong>{t.howItWorks.detailedSteps.loginStaff.step3}</strong><br />
+                  • <strong>{t.howItWorks.detailedSteps.loginStaff.step4}</strong><br />
+                  • {t.howItWorks.detailedSteps.loginStaff.step5}
                 </Typography>
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 4, height: '100%', bgcolor: 'warning.50' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'warning.main' }}>
-                  3. Produkte auswählen – Manuell oder Automatisch
+                  {t.howItWorks.detailedSteps.products.title}
                 </Typography>
                 <Typography variant="body2" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-                  <strong>Manuell:</strong><br />
-                  • Durchsuchen Sie unser Produktsortiment<br />
-                  • Bestellen Sie in nur wenigen Klicks<br />
+                  <strong>{t.howItWorks.detailedSteps.products.manualTitle}</strong><br />
+                  • {t.howItWorks.detailedSteps.products.manualStep1}<br />
+                  • {t.howItWorks.detailedSteps.products.manualStep2}<br />
                   <br />
-                  <strong>Automatisiert:</strong><br />
-                  • Richten Sie wiederkehrende Bestellungen ein<br />
-                  • Automatische monatliche Lieferungen<br />
-                  • Lassen Sie Mitarbeiter Bestellungen durchführen
+                  <strong>{t.howItWorks.detailedSteps.products.automatedTitle}</strong><br />
+                  • {t.howItWorks.detailedSteps.products.automatedStep1}<br />
+                  • {t.howItWorks.detailedSteps.products.automatedStep2}<br />
+                  • {t.howItWorks.detailedSteps.products.automatedStep3}
                 </Typography>
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 4, height: '100%', bgcolor: 'secondary.50' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'secondary.main' }}>
-                  4. Bestellung & Kontrolle
+                  {t.howItWorks.detailedSteps.orderControl.title}
                 </Typography>
                 <Typography variant="body2" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-                  • Wählen Sie Lieferdatum und Versandart<br />
-                  • Bestätigen Sie Ihre Bestellung<br />
-                  • <strong>Verfolgen Sie den Status in Echtzeit</strong><br />
-                  • <strong>Detaillierte Statistiken im Dashboard</strong><br />
-                  • Kontrolle über den gesamten Workflow
+                  • {t.howItWorks.detailedSteps.orderControl.step1}<br />
+                  • {t.howItWorks.detailedSteps.orderControl.step2}<br />
+                  • <strong>{t.howItWorks.detailedSteps.orderControl.step3}</strong><br />
+                  • <strong>{t.howItWorks.detailedSteps.orderControl.step4}</strong><br />
+                  • {t.howItWorks.detailedSteps.orderControl.step5}
                 </Typography>
               </Paper>
             </Grid>
@@ -583,36 +577,36 @@ const LandingPage = () => {
           <Box sx={{ mt: 6 }}>
             <Paper elevation={6} sx={{ p: 4, bgcolor: 'info.50', borderRadius: 3, border: '2px solid', borderColor: 'info.main' }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'info.dark', mb: 2, textAlign: 'center' }}>
-                Flexibilität für Ihren Pflegedienst
+                {t.howItWorks.flexibility.title}
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
-                      Manuelle Bestellung
+                      {t.howItWorks.flexibility.manual.title}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Schnell und einfach in wenigen Klicks
+                      {t.howItWorks.flexibility.manual.description}
                     </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
-                      Automatische Bestellung
+                      {t.howItWorks.flexibility.automatic.title}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Wiederkehrende monatliche Lieferungen
+                      {t.howItWorks.flexibility.automatic.description}
                     </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'warning.main', mb: 1 }}>
-                      Mitarbeiter-Bestellung
+                      {t.howItWorks.flexibility.staff.title}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Delegieren Sie an Ihr Team
+                      {t.howItWorks.flexibility.staff.description}
                     </Typography>
                   </Box>
                 </Grid>
@@ -668,21 +662,19 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: { xs: 3, md: 4 }, textAlign: 'center', color: 'white', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Über uns
+            {t.aboutUs.title}
           </Typography>
           <Typography
             variant="body1"
             sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: { xs: 3, md: 4 }, color: 'white', px: { xs: 1, sm: 0 } }}
           >
-            <strong>MedWeg Bavaria</strong> ist Ihr zuverlässiger Partner für medizinische Versorgung mit Sitz in <strong>Augsburg, Deutschland</strong>.
-            Wir spezialisieren uns auf den Vertrieb hochwertiger medizinischer Produkte für <strong>Unternehmen</strong> und <strong>Privatpersonen</strong>.
+            {t.aboutUs.description1}
           </Typography>
           <Typography
             variant="body1"
             sx={{ fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, lineHeight: 1.9, textAlign: 'center', maxWidth: '900px', mx: 'auto', mb: { xs: 4, md: 6 }, color: 'white', px: { xs: 1, sm: 0 } }}
           >
-            Unser Sortiment umfasst Einweghandschuhe, Desinfektionsmittel und Desinfektionstücher – alles,
-            was Sie für eine sichere und hygienische Arbeitsumgebung benötigen.
+            {t.aboutUs.description2}
           </Typography>
 
           {/* Products Grid */}
@@ -719,11 +711,10 @@ const LandingPage = () => {
                     }}
                   />
                   <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                    Einweghandschuhe
+                    {t.aboutUs.products.gloves.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Hochwertige Handschuhe in verschiedenen Größen (S, M, L, XL) für maximalen Schutz
-                    und Komfort in medizinischen und hygienischen Umgebungen.
+                    {t.aboutUs.products.gloves.description}
                   </Typography>
                 </CardContent>
               </Card>
@@ -761,11 +752,10 @@ const LandingPage = () => {
                     }}
                   />
                   <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                    Desinfektionsmittel
+                    {t.aboutUs.products.disinfectant.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Effektive flüssige Desinfektionsmittel zur Hände- und Flächendesinfektion.
-                    Zuverlässiger Schutz gegen Bakterien und Viren.
+                    {t.aboutUs.products.disinfectant.description}
                   </Typography>
                 </CardContent>
               </Card>
@@ -803,11 +793,10 @@ const LandingPage = () => {
                     }}
                   />
                   <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                    Desinfektionstücher
+                    {t.aboutUs.products.wipes.title}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.95rem' }}>
-                    Praktische Einwegtücher für schnelle und effektive Desinfektion von Oberflächen.
-                    Ideal für unterwegs und den täglichen Gebrauch.
+                    {t.aboutUs.products.wipes.description}
                   </Typography>
                 </CardContent>
               </Card>
@@ -820,7 +809,7 @@ const LandingPage = () => {
               variant="h4"
               sx={{ fontWeight: 700, mb: { xs: 3, md: 5 }, textAlign: 'center', color: 'white', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' } }}
             >
-              Über den Geschäftsführer
+              {t.aboutUs.ceo.sectionTitle}
             </Typography>
             <Paper elevation={6} sx={{ p: { xs: 3, sm: 4, md: 5 }, borderRadius: 4, background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)' }}>
               <Grid container spacing={{ xs: 3, md: 4 }} alignItems="center">
@@ -873,30 +862,26 @@ const LandingPage = () => {
                     Illes Papp
                   </Typography>
                   <Typography variant="subtitle1" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    Geschäftsführer
+                    {t.aboutUs.ceo.position}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={8}>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'primary.dark' }}>
-                    Erfahrung und Expertise
+                    {t.aboutUs.ceo.experienceTitle}
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, fontSize: '1.05rem' }}>
-                    Mit langjähriger Erfahrung in der <strong>Pflegebranche</strong> bringt Illes Papp umfassende Kenntnisse
-                    und praktische Expertise in die MedWeg Bavaria ein. Als erfahrener Geschäftsführer hat er erfolgreich
-                    sein eigenes Unternehmen in Deutschland geleitet:
+                    {t.aboutUs.ceo.experienceText}
                   </Typography>
                   <Paper elevation={2} sx={{ p: 3, mb: 2, bgcolor: 'primary.50', borderLeft: '4px solid', borderColor: 'primary.main' }}>
                     <Typography variant="body1" sx={{ fontWeight: 600, color: 'primary.dark', mb: 1 }}>
-                      Intensiv- und ambulante Pflegedienst
+                      {t.aboutUs.ceo.companyTitle}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
-                      Gründung und Leitung eines erfolgreichen Pflegedienstes mit Fokus auf intensive und ambulante Pflege
+                      {t.aboutUs.ceo.companyDescription}
                     </Typography>
                   </Paper>
                   <Typography variant="body1" sx={{ lineHeight: 1.8, fontSize: '1.05rem' }}>
-                    Seine tiefe Branchenkenntnis und sein Engagement für Qualität machen ihn zum idealen Ansprechpartner
-                    für alle Fragen rund um medizinische Versorgungsprodukte. Bei MedWeg Bavaria steht <strong>Kundenservice,
-                    Zuverlässigkeit und höchste Qualitätsstandards</strong> an erster Stelle.
+                    {t.aboutUs.ceo.closingText}
                   </Typography>
                 </Grid>
               </Grid>
@@ -929,7 +914,7 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: { xs: 4, md: 6 }, mt: { xs: 4, md: 8 }, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Unsere Partner
+            {t.partners.title}
           </Typography>
           <Box
             sx={{
@@ -999,13 +984,13 @@ const LandingPage = () => {
             variant="h3"
             sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}
           >
-            Kontaktieren Sie uns
+            {t.contact.title}
           </Typography>
           <Typography
             variant="body1"
             sx={{ textAlign: 'center', color: 'text.secondary', mb: { xs: 4, md: 6 }, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, px: { xs: 1, sm: 0 } }}
           >
-            Haben Sie Fragen oder möchten Sie ein Angebot erhalten? Schreiben Sie uns!
+            {t.contact.subtitle}
           </Typography>
 
           <Paper elevation={8} sx={{ maxWidth: '800px', mx: 'auto', p: { xs: 3, sm: 4, md: 5 }, borderRadius: 4, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
@@ -1014,7 +999,7 @@ const LandingPage = () => {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Name *"
+                    label={t.contact.form.name}
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -1025,7 +1010,7 @@ const LandingPage = () => {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="E-Mail *"
+                    label={t.contact.form.email}
                     name="email"
                     type="email"
                     value={formData.email}
@@ -1037,7 +1022,7 @@ const LandingPage = () => {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Telefon"
+                    label={t.contact.form.phone}
                     name="telefon"
                     value={formData.telefon}
                     onChange={handleInputChange}
@@ -1047,7 +1032,7 @@ const LandingPage = () => {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Ihre Nachricht *"
+                    label={t.contact.form.message}
                     name="nachricht"
                     multiline
                     rows={6}
@@ -1083,10 +1068,10 @@ const LandingPage = () => {
                     {isSubmitting ? (
                       <>
                         <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                        Wird gesendet...
+                        {t.contact.form.submitting}
                       </>
                     ) : (
-                      'Nachricht senden'
+                      t.contact.form.submit
                     )}
                   </Button>
                 </Grid>
@@ -1167,25 +1152,25 @@ const LandingPage = () => {
             }}
           >
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: 'primary.main' }}>
-              Unser Standort
+              {t.location.title}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
               <LocationOnIcon sx={{ fontSize: 45, color: 'error.main' }} />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  MedWeg Bavaria
+                  {t.location.companyName}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Augsburg, Deutschland
+                  {t.location.city}
                 </Typography>
               </Box>
             </Box>
             <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
               <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
-                <strong>Stadt:</strong> Augsburg, Bayern<br />
-                <strong>E-Mail:</strong> medwegbavaria@gmail.com<br />
-                <strong>Telefon:</strong> +4915238941718<br />
-                <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
+                <strong>{t.location.details.cityLabel}</strong> {t.location.details.cityValue}<br />
+                <strong>{t.location.details.emailLabel}</strong> medwegbavaria@gmail.com<br />
+                <strong>{t.location.details.phoneLabel}</strong> +4915238941718<br />
+                <strong>{t.location.details.hoursLabel}</strong> {t.location.details.hoursValue}
               </Typography>
             </Box>
           </Paper>
@@ -1223,25 +1208,25 @@ const LandingPage = () => {
               }}
             >
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: 'primary.main' }}>
-                Unser Standort
+                {t.location.title}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <LocationOnIcon sx={{ fontSize: 35, color: 'error.main' }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    MedWeg Bavaria
+                    {t.location.companyName}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Augsburg, Deutschland
+                    {t.location.city}
                   </Typography>
                 </Box>
               </Box>
               <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
                 <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
-                  <strong>Stadt:</strong> Augsburg, Bayern<br />
-                  <strong>E-Mail:</strong> medwegbavaria@gmail.com<br />
-                  <strong>Telefon:</strong> +4915238941718<br />
-                  <strong>Öffnungszeiten:</strong> Mo-Fr, 9:00-18:00 Uhr
+                  <strong>{t.location.details.cityLabel}</strong> {t.location.details.cityValue}<br />
+                  <strong>{t.location.details.emailLabel}</strong> medwegbavaria@gmail.com<br />
+                  <strong>{t.location.details.phoneLabel}</strong> +4915238941718<br />
+                  <strong>{t.location.details.hoursLabel}</strong> {t.location.details.hoursValue}
                 </Typography>
               </Box>
             </Paper>
