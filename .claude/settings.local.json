@@ -1,16 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e:*)",
-      "Bash(dir:*)",
-      "Bash(findstr:*)",
-      "Bash(npm run build:*)",
-      "Bash(tree:*)",
-      "Bash(tree_output.txt)",
-      "Bash(npm install:*)",
-      "Bash(mkdir:*)",
-      "Bash(copy:*)",
-      "Bash(cp:*)"
+      "Bash(find:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(\"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe\" ecs describe-tasks:*)",
+      "Bash(\"C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe\" elbv2 describe-listeners:*)"
     ],
     "deny": [],
     "ask": []
