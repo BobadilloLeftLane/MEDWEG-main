@@ -184,6 +184,11 @@ export interface Translation {
         sendError: string;
       };
       success: string;
+      successModal: {
+        title: string;
+        message: string;
+        button: string;
+      };
     };
   };
 
@@ -400,7 +405,12 @@ export const translations: Record<'de' | 'en', Translation> = {
           allFields: 'Bitte füllen Sie alle Felder aus',
           sendError: 'Fehler beim Senden der Nachricht',
         },
-        success: 'Vielen Dank! Ihre Nachricht wurde gesendet. Sie erhalten eine Bestätigungsmail.',
+        success: 'Vielen Dank! Ihre Nachricht wurde gesendet.',
+        successModal: {
+          title: 'Nachricht gesendet!',
+          message: 'Vielen Dank für Ihre Nachricht. Wir werden uns so schnell wie möglich bei Ihnen melden.',
+          button: 'Schließen',
+        },
       },
     },
 
@@ -614,7 +624,12 @@ export const translations: Record<'de' | 'en', Translation> = {
           allFields: 'Please fill in all fields',
           sendError: 'Error sending message',
         },
-        success: 'Thank you! Your message has been sent. You will receive a confirmation email.',
+        success: 'Thank you! Your message has been sent.',
+        successModal: {
+          title: 'Message Sent!',
+          message: 'Thank you for your message. We will get back to you as soon as possible.',
+          button: 'Close',
+        },
       },
     },
 

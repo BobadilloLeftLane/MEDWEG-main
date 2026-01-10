@@ -1,9 +1,10 @@
-import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Paper, Avatar, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, CardContent, TextField, Button, Paper, Avatar, CircularProgress, Dialog, DialogContent } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import LandingHeader from '../components/LandingHeader';
 import LandingFooter from '../components/LandingFooter';
-import * as contactApi from '../api/contactApi';
+import emailjs from '@emailjs/browser';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useLanguage } from '../contexts/LanguageContext';
 import GlovesIcon from '../assets/icons/GlovesIcon';
 import DisinfectantIcon from '../assets/icons/DisinfectantIcon';
@@ -24,6 +25,11 @@ import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
+// EmailJS Configuration
+const EMAILJS_SERVICE_ID = 'service_x2hww4b';
+const EMAILJS_TEMPLATE_ID = 'template_vmirj8v';
+const EMAILJS_PUBLIC_KEY = 'AI-iBwRY0ONPbgwc5';
+
 const LandingPage = () => {
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
@@ -33,6 +39,7 @@ const LandingPage = () => {
     nachricht: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -53,18 +60,30 @@ const LandingPage = () => {
     try {
       setIsSubmitting(true);
 
-      // Submit contact form
-      await contactApi.submitContactForm({
-        name: formData.name,
-        email: formData.email,
-        subject: `Kontakt: ${formData.telefon}`, // Use telefon as subject or combine
-        message: formData.nachricht,
-      });
+      // Send email via EmailJS (no backend required)
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: formData.name,
+          email: formData.email,
+          subject: `Telefon: ${formData.telefon}`,
+          message: formData.nachricht,
+          time: new Date().toLocaleString('de-DE', {
+            timeZone: 'Europe/Berlin',
+            dateStyle: 'full',
+            timeStyle: 'short'
+          }),
+        },
+        EMAILJS_PUBLIC_KEY
+      );
 
-      toast.success(t.contact.form.success);
+      // Show success modal
+      setShowSuccessModal(true);
       setFormData({ name: '', email: '', telefon: '', nachricht: '' });
     } catch (error: any) {
-      toast.error(error.response?.data?.error || t.contact.form.errors.sendError);
+      console.error('EmailJS error:', error);
+      toast.error(t.contact.form.errors.sendError);
     } finally {
       setIsSubmitting(false);
     }
@@ -1255,6 +1274,60 @@ const LandingPage = () => {
           <LandingFooter />
         </Box>
       </Box>
+
+      {/* Success Modal */}
+      <Dialog
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            p: 2,
+            maxWidth: 400,
+            textAlign: 'center',
+          }
+        }}
+      >
+        <DialogContent sx={{ py: 4 }}>
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              backgroundColor: '#e8f5e9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 24px',
+            }}
+          >
+            <CheckCircleOutlineIcon sx={{ fontSize: 50, color: '#4caf50' }} />
+          </Box>
+          <Typography variant="h5" fontWeight={700} color="#2e7d32" gutterBottom>
+            {t.contact.form.successModal?.title || 'Nachricht gesendet!'}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            {t.contact.form.successModal?.message || 'Vielen Dank für Ihre Nachricht. Wir werden uns so schnell wie möglich bei Ihnen melden.'}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => setShowSuccessModal(false)}
+            sx={{
+              backgroundColor: '#00BCD4',
+              borderRadius: 3,
+              px: 4,
+              py: 1.5,
+              textTransform: 'none',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: '#00ACC1',
+              }
+            }}
+          >
+            {t.contact.form.successModal?.button || 'Schließen'}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

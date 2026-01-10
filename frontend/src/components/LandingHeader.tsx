@@ -109,10 +109,15 @@ const LandingHeader = () => {
               <MenuItem value="en">EN</MenuItem>
             </Select>
 
-            {/* Desktop Login/Register Button */}
+            {/* Desktop Contact Button */}
             <Button
               variant="contained"
-              onClick={handleLoginClick}
+              onClick={() => {
+                const element = document.getElementById('kontakt');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               sx={{
                 display: { xs: 'none', md: 'flex' },
                 px: 3,
@@ -128,7 +133,7 @@ const LandingHeader = () => {
                 },
               }}
             >
-              {t.header.login}
+              {t.header.contact}
             </Button>
 
             {/* Language Switcher - Mobile */}
@@ -160,10 +165,15 @@ const LandingHeader = () => {
               <MenuItem value="en">EN</MenuItem>
             </Select>
 
-            {/* Mobile Login/Register Button - Top Right */}
+            {/* Mobile Contact Button */}
             <Button
               variant="contained"
-              onClick={handleLoginClick}
+              onClick={() => {
+                const element = document.getElementById('kontakt');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               sx={{
                 display: { xs: 'flex', md: 'none' },
                 px: { xs: 1.5, sm: 2 },
@@ -182,7 +192,7 @@ const LandingHeader = () => {
                 },
               }}
             >
-              {language === 'de' ? 'Anmelden' : 'Login'}
+              {t.header.contact}
             </Button>
 
             {/* Mobile Menu Icon */}
